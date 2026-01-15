@@ -1,0 +1,70 @@
+
+Phased Implementation Plan
+1. Purpose
+The purpose of this document is to outline a staged implementation approach for the proposed system. The aim is to deliver the product incrementally, validate assumptions to stakeholders at an early stage, and add revenue-generating features much later when the core functionality is stabilized.
+2. Implementation Strategy Overview
+The implementation is divided into three phase
+Phase 1: Basic Implementation
+Phase 2: Minimum Viable Product (MVP)
+Phase 3: Revenue Generation
+3. Phase 1 – Basic Implementation
+3.1 Objective
+The objective of Phase 1 is to develop a basic working version of the system that covers the basic user journey and confirm end-to-end data flow.
+3.2 Scope
+3.2.1 User Onboarding and Profiling
+User registration using email and mobile verification
+Collection of basic financial details
+Initial financial profiling logic
+Basic persona assignment
+3.2.2 Investment Aptitude Survey
+Implementation of a risk-profiling questionnaire
+Risk score calculation
+Classification into predefined risk categories
+3.2.3 Financial Health Score
+Basic health score calculation
+Presentation of score on user dashboard
+3.2.4 Problem Identification
+Identification of key financial gaps using simple rules
+Display of suggested action items
+3.2.5 Core Calculators
+SIP calculator
+Retirement calculator
+EMI calculator
+3.2.6 Technical Setup
+Initial frontend and backend configuration
+Database schema for core entities
+API endpoints for major flows
+3.3 Deliverables
+Functional end-to-end system
+Internal demo build
+Verified data flow across modules
+4. Phase 2 – Minimum Viable Product (MVP)
+4.1 Objective
+Phase 2 is aimed at getting the system to an MVP stage, which would be client ready and would help with user experience validation, outputs and general value proposition
+4.2 Scope
+4.2.1 Extended Calculator Suite
+Calculators for insurance and education planning
+HRA and CAGR calculators
+PDF export of results
+4.2.2 Advisory Reporting
+Generation of structured advisory reports
+Inclusion of summaries
+4.3  Deliverables
+Client-demo ready MVP
+Stakeholder feedback
+5. Phase 3 – Revenue Generation
+5.1 Objective
+The objective of Phase 3 is to introduce revenue-generating features once the core system has been validated.
+5.2 Scope
+5.2.1 Option Wealth Module
+Asset selection and pledge mechanism
+Margin calculation based on asset value
+Trial mode for risk-free evaluation
+Live mode with controlled risk handling
+5.2.2 Monitoring and Stability
+Monitoring of system performance
+Handling of operational issues
+5.3 Deliverables
+Revenue-enabled system
+Stable monetization flows
+Production ready platform

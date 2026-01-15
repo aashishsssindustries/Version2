@@ -1,0 +1,27 @@
+{
+    "name": "wealthmax",
+    "version": "1.0.0",
+    "description": "WealthMax - Fintech Web Application",
+    "private": true,
+    "workspaces": [
+        "frontend",
+        "backend"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+        "dev:backend": "npm run dev --workspace=backend",
+        "dev:frontend": "npm run dev --workspace=frontend",
+        "build": "npm run build --workspaces",
+        "lint": "npm run lint --workspaces",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "prettier": "^3.1.1"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    }
+}

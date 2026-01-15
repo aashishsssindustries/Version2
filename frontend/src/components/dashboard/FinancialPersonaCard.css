@@ -1,0 +1,145 @@
+.persona-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.persona-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.persona-icon {
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4f46e5;
+    color: white;
+    border-radius: 8px;
+}
+
+.persona-info {
+    flex: 1;
+}
+
+.persona-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.persona-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.persona-details {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.persona-section {
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+
+.section-tag {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.section-desc {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.risk-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.habits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.habit-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+}
+
+.habit-label {
+    color: #6b7280;
+}
+
+.habit-value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.goals-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.goals-list li {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.persona-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: right;
+}
+
+.update-link {
+    color: #4f46e5;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.update-link:hover {
+    text-decoration: underline;
+}

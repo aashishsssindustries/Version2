@@ -1,0 +1,201 @@
+.health-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.health-card.locked {
+    position: relative;
+    min-height: 300px;
+}
+
+.lock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(249, 250, 251, 0.95);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+}
+
+.lock-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.health-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.category-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.category-badge.score-high {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.category-badge.score-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.category-badge.score-low {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.score-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 0;
+    margin-bottom: 24px;
+}
+
+.score-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.score-ring {
+    transform: rotate(-90deg);
+}
+
+.score-bg {
+    fill: none;
+    stroke: #f3f4f6;
+    stroke-width: 12;
+}
+
+.score-progress {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.score-progress.score-high {
+    stroke: #10b981;
+}
+
+.score-progress.score-medium {
+    stroke: #f59e0b;
+}
+
+.score-progress.score-low {
+    stroke: #ef4444;
+}
+
+.score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.score-number {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.score-max {
+    display: block;
+    font-size: 14px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+.health-breakdown {
+    flex: 1;
+}
+
+.health-breakdown h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 16px 0;
+}
+
+.breakdown-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.breakdown-item {
+    display: grid;
+    grid-template-columns: 100px 1fr 60px;
+    gap: 12px;
+    align-items: center;
+}
+
+.breakdown-label {
+    font-size: 13px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.breakdown-bar {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.breakdown-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.breakdown-fill.savings {
+    background: #10b981;
+}
+
+.breakdown-fill.debt {
+    background: #ef4444;
+}
+
+.breakdown-fill.liquidity {
+    background: #3b82f6;
+}
+
+.breakdown-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: right;
+}

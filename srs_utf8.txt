@@ -1,0 +1,175 @@
+
+ClientX: Comprehensive Software Requirements Specification (SRS) v1.20
+1. Executive Scope
+ClientX is a web-based fintech platform designed to function as an automated financial advisor. It guides users from data profiling to solution execution (insurance, mutual funds, options trading, etc.).
+Core Value Proposition: A "Financial Health Score" gamification engine and a unique "Option Wealth" module allowing 80% LTV margin against pledged assets.
+2. User Actors & Journeys
+The system must support three distinct logic paths based on user personas:
+Persona A (Early Career): Focus on SIPs, Tax Saving, and simple goal planning.
+Path: Onboarding → Aptitude Survey → SIP Execution.
+Persona B (Mid-Career/High Income): Focus on risk management and active trading.
+Path: Liability capture → Portfolio Pledging → Option Wealth Trial.
+Persona C (HNI/Retiring): Focus on capital preservation.
+Path: Net Worth Analysis → Retirement Planning → Income Solutions.
+3. Functional Modules
+3.1 Intelligent Profiling Engine
+Persona A (25–35, ₹6–18 LPA): Focuses on savings, SIPs, and future goals; values simplicity and low-cost guidance. Journey: Onboarding → Profiling → SIP/retirement suggestions → Advisory report → Start SIP.
+Persona B (35–50, ₹20–60 LPA): Seeks tax optimization, diversification, and risk control with detailed tools. Journey: Deep profiling → Margin pledge → Option Wealth trial → Advisory report.
+Persona C (50+): Asset-heavy, prioritizes preservation, income, and estate planning. Journey: Net-worth analysis → Retirement tools → Insurance/income solutions.
+
+Objective: Create a visual "Financial Persona" and compare against the 30-30-30-10 Rule.
+Data Ingestion:
+Mandatory: Name, Email (OTP verified), Mobile (OTP verified), PAN (10-char alphanumeric validation).
+Financials: Gross Income, Fixed Expenses, Liabilities (EMI), Existing Assets.
+Logic:
+Validate PAN format and income ranges.
+Compute user distribution: Expenditure vs. Liabilities vs. Investment vs. Emergency Fund.
+Gap Analysis: Compare user ratios against the Ideal Rule (30% Exp, 30% Liab, 30% Inv, 10% Emergency).
+Output: Interactive Persona Card (SVG) highlighting deviation from the ideal model.
+3.2 Investment Aptitude Survey
+Objective: Psychometric profiling to determine Risk Class.
+Mechanism: 25-question dynamic form.
+Scoring: Weighted responses (1-5 scale) normalized to a 0-100 score.
+Bucketing Logic:
+0–33: Conservative
+34–66: Moderate
+67–100: Aggressive
+Guardrails: Logic must detect contradictions (e.g., "High Risk" preference but "Low Loss" tolerance) and default to the lower risk category.
+3.3 Financial Health Score (Gamification)
+Objective: A real-time composite score (0-100) to drive user engagement.
+Algorithm Weights:
+Savings Rate (20%): (Investments + Emergency Fund) / Income.
+Debt Ratio (20%): Total EMI / Income (Must punish >40%).
+Liquidity (15%): Emergency Fund / Monthly Expenses (Target: 6 months).
+Diversity (15%): Asset allocation spread.
+Goal Preparedness (15%): Funded status of declared goals.
+Literacy (15%): Survey score normalization.
+UI Requirement: Display percentile ranking against "Top Investors" and "Projected Score" if recommendations are followed.
+3.4 Automated Problem Identification
+The logic engine must auto-detect and flag specific financial risks:
+Emergency Shortfall: Liquidity < 3 months.
+Debt Trap: DTI Ratio > 40%.
+Under-insured: Life cover < (Income $\times$ 10) + Liabilities.
+Output: Ranked list of "Action Items" with estimated financial impact.
+
+
+4. Calculator Suite Specifications
+All calculators must support graphical output (Highcharts/Recharts) and PDF export.
+Calculator
+Inputs
+Logic / Formula
+Output
+SIP
+SIP Amount, Rate, Tenure
+$FV = P \times \frac{(1+r)^n - 1}{r} \times (1+r)$
+Future Corpus, Invested vs. Gain
+Life Insurance
+Income, Dependents, Liabilities, Assets
+Human Life Value (HLV): PV of future income + Liabilities - Assets
+Required Cover Gap
+Retirement
+Current Age, Ret. Age, Expenses, Inflation
+Inflation-adjusted expense projection vs. Annuity yield
+Required Monthly SIP
+Education
+Child Age, Goal Year, Cost, Inflation
+FV of Cost vs. FV of Current Savings
+Monthly Saving Requirement
+Cost of Delay
+SIP Amount, Rate, Delay (Years)
+$\Delta = FV_{immediate} - FV_{delayed}$
+Absolute Loss (INR)
+HRA
+Basic, DA, Rent, City Type
+Min(Actual HRA, Rent-10% Basic, 50/40% Basic)
+Tax Saved Amount
+EMI
+Principal, Rate, Tenure
+$E = P \times r \times \frac{(1+r)^n}{(1+r)^n - 1}$
+Monthly Outflow, Interest Split
+Home Affordability
+Income, Existing EMI, Tenure
+Reverse EMI calculation capping total EMI at 40% Income
+Max Loan Eligibility
+CAGR
+Start Value, End Value, Years
+$(End/Start)^{1/n} - 1$
+Annualized Return %
+Any Other Calculator
+Inputs data
+Logic / Formula based on the Calculator
+Based on the Calculator
+5. Option Wealth Module (Special Feature)
+Objective: Provide options trading leverage backed by portfolio collateral.
+5.1 Eligibility & Pledge
+Input: User selects Mutual Fund/Equity holdings from portfolio.
+Valuation: Real-time API fetch of NAV/Price.
+LTV Logic: Cap margin credit at 80% of Market Value.
+Ledger: Create a shadow ledger for "Pledged Assets" locked from sale.
+5.2 Trading Controls
+Trial Mode: Mandatory 30-day sandbox for new users. same logic, virtual money.
+Live Mode: Enabled only after KYC + Risk Disclosure + Trial completion.
+Risk Engine (Critical):
+Monitor Margin Utilization in real-time.
+Trigger: If Utilization > 90% LTV → Issue Warning.
+Trigger: If Utilization > 100% LTV → Auto-Liquidation of positions.
+6. Reporting Module
+System must generate a white-labeled PDF advisory report.
+Technology: Headless browser (Puppeteer/Playwright) for HTML-to-PDF rendering.
+Content Structure:
+Executive Summary: Top 3 Actions & Health Score.
+Persona Viz: Current vs. Ideal asset mix.
+Gap Analysis: Detailed breakdown of insurance/investment shortfalls.
+Projections: SIP growth charts and Retirement glide paths.
+Marketplace: Specific product recommendations (ISIN/Scheme Codes).
+Compliance: Footer must contain dynamic disclaimers, generation timestamp, and advisor license info.
+7. Technical Architecture
+7.1 Stack Recommendations
+Frontend: React.js / Next.js (TypeScript). Visual libraries: D3.js or Recharts.
+Backend: Node.js (Microservices) or Java Spring Boot.
+Database:
+Primary: PostgreSQL(via Supabase) (Users, Portfolios, Transactions).
+Cache: Redis (Session mgmt, Live Market Data).
+Search: ElasticSearch (Marketplace product discovery).
+Infrastructure: Docker/Kubernetes on AWS/GCP.
+7.2 API Design (RESTful v1)
+POST /auth/otp & POST /auth/verify (Login)
+GET /user/profile/score (Real-time Health Score)
+POST /calculators/{type} (Stateless computation)
+POST /portfolio/pledge (Initiate LTV lock)
+GET /report/generate (Trigger PDF async job)
+Any Other APIs could be used during Development.
+7.3 Security & Compliance
+Data Protection: PII (PAN, Phone) must be encrypted (AES-256).
+Audit: Immutable logs required for all "Advice Generated" and "Pledge Created" events.
+Access Control: RBAC for Admin, Advisor, and Partner (White-label view).
+8. Acceptance Criteria (MVP)
+Profile: User can complete onboarding and see "Financial Persona" in < 3 minutes.
+Score: Health Score updates instantly upon changing "Savings" input.
+Report: PDF generates correctly with valid user data in < 5 seconds.
+Pledge: System accurately rejects pledge requests for ineligible securities (e.g., Small-cap funds).
+9. Non-Functional Requirements:
+Performance: Dashboards load under 5 seconds; calculators respond instantly.
+Availability: 99.9% uptime with planned maintenance notices.
+Scalability: Auto-scales during peak onboarding periods.
+Localization: INR default; future support for English + regional languages.
+Accessibility: WCAG compliant.
+Extensibility: Modular calculators, connectors, and plugin-ready architecture.
+
+10. Testing & QA
+Test types: Unit, integration, e2e, performance, security (pen tests), UX tests.
+Acceptance Tests (sample): - SIP calculator: known values must match expected output to within rounding error. - LTV calculation: test with sample portfolio values and prices. - Report generation: PDF renders correctly and includes expected sections.
+11. Roadmap (High-level Phases)
+MVP (0–1 months): Core profiling, survey, dynamic checklist, SIP & Retirement calculators, Financial Health Score, simple advisory PDF (static template), basic marketplace listing (non-executable), user auth, DB.
+Phase 2 (1–2 months): Full calculator suite, portfolio import, mutual fund processor integration (read-only), HRA/EMI calculators, enhanced UI/UX polishing, report white-labeling.
+Phase 3 (2–4 months): Option Wealth module, pledge mechanics, trial flows, real-time pricing, payments & mandates, deeper integrations, advanced analytics and personalization.
+12. Acceptance Criteria & KPIs
+Core metrics: - User activation rate (Profile completed): target 40% in first 30 days. - Conversion to action (start SIP / buy insurance): target 5–10% of activated users. - Advisory report downloads / shares per user. - Option Wealth conversion for eligible users.
+13. Appendices
+A. Glossary — Definitions of terms (SIP, LTV, NAV, CAGR, PAN, eNACH) 
+B. Formula Reference — All calculator formulae summarized 
+C. Sample Data Models — Entities and sample JSON payloads (available on request)
+Contact & Next Steps
+Product lead: [To be filled]
+Recommended next steps: UX wireframes for persona + report, API design sprint, compliance review for Option Wealth legal flows, vendor shortlisting for market data & MF processors.
+End of SRS v1.20
