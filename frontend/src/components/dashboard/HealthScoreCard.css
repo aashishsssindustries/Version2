@@ -1,0 +1,368 @@
+.health-card-container {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Locked State */
+.health-card-container.locked {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 400px;
+}
+
+.locked-state {
+    padding: 32px;
+}
+
+.locked-gauge {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
+}
+
+.locked-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.locked-state p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 24px;
+    max-width: 260px;
+}
+
+.gauge-locked-text {
+    font-size: 48px;
+    font-weight: 700;
+    fill: #cbd5e1;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.gauge-locked-label {
+    font-size: 14px;
+    fill: #94a3b8;
+    text-anchor: middle;
+    font-weight: 600;
+}
+
+.unlock-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: all 0.2s;
+}
+
+.unlock-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+/* Gauge Section */
+.gauge-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.gauge-svg {
+    width: 180px;
+    height: 180px;
+}
+
+.gauge-bg {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 12;
+}
+
+.gauge-progress {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+}
+
+.gauge-progress.excellent {
+    stroke: #10b981;
+}
+
+.gauge-progress.good {
+    stroke: #3b82f6;
+}
+
+.gauge-progress.average {
+    stroke: #f59e0b;
+}
+
+.gauge-progress.poor {
+    stroke: #ef4444;
+}
+
+.gauge-score {
+    font-size: 48px;
+    font-weight: 800;
+    fill: #1e293b;
+    text-anchor: middle;
+}
+
+.gauge-max {
+    font-size: 14px;
+    font-weight: 500;
+    fill: #94a3b8;
+    text-anchor: middle;
+}
+
+.gauge-label {
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.gauge-label.excellent {
+    fill: #10b981;
+}
+
+.gauge-label.good {
+    fill: #3b82f6;
+}
+
+.gauge-label.average {
+    fill: #f59e0b;
+}
+
+.gauge-label.poor {
+    fill: #ef4444;
+}
+
+/* Stats Row */
+.stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-chip.percentile {
+    border-color: #c7d2fe;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+}
+
+.stat-chip.percentile svg {
+    color: #6366f1;
+}
+
+.stat-chip.projected {
+    border-color: #bbf7d0;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.stat-chip.projected svg {
+    color: #16a34a;
+}
+
+.stat-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.stat-label {
+    display: block;
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Breakdown Toggle */
+.breakdown-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.breakdown-toggle:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* Breakdown Panel */
+.breakdown-panel {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.factor-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.factor-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.factor-row:first-child {
+    padding-top: 0;
+}
+
+.factor-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.factor-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.factor-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.factor-desc {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.factor-score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.factor-bar {
+    width: 60px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.factor-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #4f46e5);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.factor-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Footer CTA */
+.health-footer {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.improvement-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.improvement-cta:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gauge-svg {
+        width: 150px;
+        height: 150px;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+}
