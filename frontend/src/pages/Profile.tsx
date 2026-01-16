@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { User, DollarSign, Shield, Info, Edit2, Save, X, Activity, AlertTriangle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+    User, Mail, Phone, Edit2, ChevronRight, RefreshCw,
+    TrendingUp, Wallet, Shield, Target, AlertCircle, CheckCircle2,
+    DollarSign, CreditCard, PiggyBank, Umbrella
+} from 'lucide-react';
 import { profileService } from '../services/api';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ProfileEditModal } from '../components/profile/ProfileEditModal';
 import './Profile.css';
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [editing, setEditing] = useState(false);
-    const [updating, setUpdating] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
 
-    // Check if coming from calculator
-    const fromCalculator = searchParams.get('from') === 'calculator';
-    const toolName = searchParams.get('tool');
-
-    // Form State
-    const [formData, setFormData] = useState({
-        gross_income: 0,
-        fixed_expenses: 0,
-        monthly_emi: 0,
-        existing_assets: 0,
-        insurance_premium: 0,
-        total_liabilities: 0,
-    });
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
         fetchProfile();
@@ -36,16 +26,6 @@ const Profile: React.FC = () => {
             setLoading(true);
             const data = await profileService.getProfile();
             setProfile(data);
-            if (data) {
-                setFormData({
-                    gross_income: data.gross_income || 0,
-                    fixed_expenses: data.fixed_expenses || 0,
-                    monthly_emi: data.monthly_emi || 0,
-                    existing_assets: data.existing_assets || 0,
-                    insurance_premium: data.insurance_premium || 0,
-                    total_liabilities: data.total_liabilities || 0,
-                });
-            }
         } catch (err) {
             console.error('Failed to fetch profile', err);
         } finally {
@@ -53,255 +33,274 @@ const Profile: React.FC = () => {
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: parseFloat(value) || 0
-        }));
+    const handleEditComplete = () => {
+        setShowEditModal(false);
+        fetchProfile();
+        navigate('/profile?updated=true');
     };
 
-    const handleSave = async () => {
-        try {
-            setUpdating(true);
-            setMessage(null);
+    // Calculate derived values
+    const monthlyIncome = profile?.gross_income ? profile.gross_income / 12 : 0;
+    const monthlyExpenses = profile?.fixed_expenses || 0;
+    const monthlyEMI = profile?.monthly_emi || 0;
+    const netSurplus = monthlyIncome - monthlyExpenses - monthlyEMI;
 
-            // Clean payload - only send required fields
-            const payload = {
-                age: profile.age,
-                gross_income: formData.gross_income,
-                fixed_expenses: formData.fixed_expenses,
-                monthly_emi: formData.monthly_emi,
-                existing_assets: formData.existing_assets,
-                insurance_premium: formData.insurance_premium,
-                total_liabilities: formData.total_liabilities,
-                insurance_coverage: profile.insurance_coverage || 0,
-                employment_type: profile.employment_type,
-                asset_types: profile.asset_types,
-                pan_number: profile.pan_number
-            };
+    const existingAssets = profile?.existing_assets || 0;
+    const emergencyFund = profile?.emergency_fund_amount || existingAssets * 0.3;
+    const emergencyMonths = monthlyExpenses > 0 ? emergencyFund / monthlyExpenses : 0;
 
-            const updated = await profileService.updateProfile(payload);
-            setProfile(updated);
-            setEditing(false);
+    const insurancePremium = profile?.insurance_premium || 0;
+    const lifeCover = profile?.insurance_cover || profile?.insurance_coverage || 0;
+    const idealCover = monthlyIncome * 12 * 10; // 10x annual income
+    const coverageAdequacy = lifeCover >= idealCover ? 'Adequate' : 'Under-insured';
 
-            // Redirect to dashboard with success flag
-            navigate('/dashboard?updated=true');
+    // Profile completion calculation
+    const requiredFields = ['gross_income', 'fixed_expenses', 'monthly_emi', 'existing_assets', 'insurance_premium'];
+    const completedFields = requiredFields.filter(f => profile?.[f] && profile[f] > 0);
+    const completionPercent = Math.round((completedFields.length / requiredFields.length) * 100);
 
-        } catch (err: any) {
-            console.error('Update failed', err);
-            setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
-        } finally {
-            setUpdating(false);
-        }
+    // Asset diversification
+    const assetTypes = profile?.asset_types || [];
+    const diversification = assetTypes.length >= 4 ? 'High' : assetTypes.length >= 2 ? 'Medium' : 'Low';
+
+    const getInitials = (name: string) => {
+        return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
     };
 
     if (loading && !profile) {
-        return <div className="p-xl text-center text-muted">Loading profile...</div>;
-    }
-
-    if (!profile) {
         return (
-            <div className="p-xl text-center">
-                <p>Profile not found. Please complete onboarding.</p>
-                <Link to="/dashboard" className="btn btn-primary mt-md">Go to Dashboard</Link>
+            <div className="profile-loading">
+                <div className="loading-spinner"></div>
+                <span>Loading profile...</span>
             </div>
         );
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-    const renderField = (label: string, name: keyof typeof formData, bgClass = 'bg-slate-50', icon?: React.ReactNode) => (
-        <div className="form-group">
-            <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
-            {editing ? (
-                <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</div>
-                    <input
-                        type="number"
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleInputChange}
-                        className="w-full pl-7 pr-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                        min="0"
-                    />
-                </div>
-            ) : (
-                <div className={`p-3 rounded border border-transparent ${bgClass} text-slate-800 font-mono font-medium flex items-center justify-between`}>
-                    <span>₹ {formData[name].toLocaleString('en-IN')}</span>
-                    {icon}
-                </div>
-            )}
-        </div>
-    );
-
     return (
-        <div className="profile-page fade-in">
-            {/* Header / Flash Message */}
-            <div className="flex justify-between items-center mb-lg">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
-                    <p className="text-slate-500">Manage your personal and financial details</p>
-                </div>
-                {!editing && (
-                    <button
-                        className="btn btn-primary flex items-center gap-2"
-                        onClick={() => setEditing(true)}
-                    >
-                        <Edit2 size={16} /> Edit Financials
-                    </button>
-                )}
-            </div>
-
-            {message && (
-                <div className={`mb-lg p-3 rounded flex items-center gap-2 text-sm font-medium animate-slideDown ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
-                    }`}>
-                    {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-                    {message.text}
-                </div>
-            )}
-
-            {/* Calculator Context Banner */}
-            {fromCalculator && (
-                <div className="mb-lg p-3 bg-blue-50 border border-blue-100 rounded text-blue-800 text-sm flex items-start gap-2">
-                    <Info size={18} className="mt-0.5 shrink-0" />
-                    <div>
-                        <strong className="block mb-1">Update from {toolName || 'Calculator'}</strong>
-                        Modify your financial assumptions below. Changes will recalculate your recommendations.
-                    </div>
-                </div>
-            )}
-
-            {/* Editing Warning */}
-            {editing && (
-                <div className="mb-lg p-3 bg-blue-50 border border-blue-100 rounded text-blue-800 text-sm flex items-start gap-2">
-                    <Info size={18} className="mt-0.5 shrink-0" />
-                    <div>
-                        <strong className="block mb-1">Recalculation Warning</strong>
-                        Updating your financials will immediately trigger a recalculation of your <strong>Financial Persona</strong>, <strong>Health Score</strong>, and <strong>Action Checklist</strong>.
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                {/* 1. Basic Details (Read Only) */}
-                <div className="card h-fit">
-                    <div className="card-header border-b border-slate-100 p-4">
-                        <div className="flex items-center gap-2 font-semibold text-slate-700">
-                            <User size={18} className="text-primary" />
-                            Personal Details
+        <div className="profile-page">
+            {/* Section 1: Sticky Header */}
+            <header className="profile-header">
+                <div className="header-content">
+                    <div className="profile-identity">
+                        <div className="avatar">
+                            {getInitials(user.name)}
                         </div>
-                    </div>
-                    <div className="p-4 space-y-4">
-                        <div>
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Full Name</label>
-                            <div className="text-slate-900 font-medium">{user.name || 'User'}</div>
-                        </div>
-                        <div>
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Email</label>
-                            <div className="flex items-center gap-2">
-                                <span className="text-slate-900">{user.email}</span>
-                                <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">VERIFIED</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Mobile</label>
-                            <div className="flex items-center gap-2">
-                                <span className="text-slate-900">{user.mobile || 'Not set'}</span>
-                                {user.mobile && <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">VERIFIED</span>}
+                        <div className="identity-info">
+                            <h1 className="user-name">{user.name || 'User'}</h1>
+                            <div className="contact-badges">
+                                <span className="badge email">
+                                    <Mail size={12} />
+                                    {user.email}
+                                    <CheckCircle2 size={12} className="verified" />
+                                </span>
+                                {user.mobile && (
+                                    <span className="badge phone">
+                                        <Phone size={12} />
+                                        {user.mobile}
+                                        <CheckCircle2 size={12} className="verified" />
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* 2. Financial Snapshot (Editable) */}
-                <div className="card md:col-span-2">
-                    <div className="card-header border-b border-slate-100 p-4 flex justify-between items-center">
-                        <div className="flex items-center gap-2 font-semibold text-slate-700">
-                            <DollarSign size={18} className="text-green-600" />
-                            Financial Snapshot
-                        </div>
-                        {editing && (
-                            <div className="flex gap-2">
-                                <button
-                                    className="btn btn-sm btn-ghost text-slate-500"
-                                    onClick={() => { setEditing(false); fetchProfile(); }} // Cancel: reset data
-                                    disabled={updating}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-primary flex items-center gap-1"
-                                    onClick={handleSave}
-                                    disabled={updating}
-                                >
-                                    {updating ? 'Saving...' : <><Save size={14} /> Save Changes</>}
-                                </button>
-                            </div>
+                    <div className="profile-tags">
+                        {profile?.persona_data?.persona?.name && (
+                            <span className="tag persona">
+                                {profile.persona_data.persona.name}
+                            </span>
                         )}
+                        <span className={`tag risk ${(profile?.risk_class || 'moderate').toLowerCase()}`}>
+                            {profile?.risk_class || profile?.persona_data?.persona?.risk_appetite || 'Unassessed'}
+                        </span>
                     </div>
-                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                        {/* Field Helper */}
-
-
-
-                        {renderField("Monthly Gross Income", "gross_income", "bg-green-50 text-green-800")}
-                        {renderField("Monthly Fixed Expenses", "fixed_expenses", "bg-red-50 text-red-800")}
-                        {renderField("Monthly EMI & Debt", "monthly_emi", "bg-orange-50 text-orange-800")}
-                        {renderField("Total Liabilities", "total_liabilities", "bg-red-50 text-red-800")}
-                        {renderField("Existing Savings/Assets", "existing_assets", "bg-blue-50 text-blue-800")}
-                        {renderField("Annual Insurance Premium", "insurance_premium", "bg-purple-50 text-purple-800")}
-
-
-                    </div>
+                    <button className="edit-btn" onClick={() => setShowEditModal(true)}>
+                        <Edit2 size={16} />
+                        Edit Profile
+                    </button>
                 </div>
+            </header>
 
-                {/* 3. Risk & Persona Summary (Read Only via Logic) */}
-                <div className="card md:col-span-3">
-                    <div className="card-header border-b border-slate-100 p-4">
-                        <div className="flex items-center gap-2 font-semibold text-slate-700">
-                            <Activity size={18} className="text-blue-600" />
-                            Current Assessment Status
+            <main className="profile-main">
+                {/* Section 5: Data Integrity Alert (Show at top if incomplete) */}
+                {completionPercent < 100 && (
+                    <div className="integrity-alert">
+                        <div className="alert-content">
+                            <AlertCircle size={20} />
+                            <div>
+                                <strong>Profile Incomplete</strong>
+                                <p>Completing your profile improves accuracy of recommendations.</p>
+                            </div>
+                        </div>
+                        <div className="completion-bar">
+                            <div className="progress" style={{ width: `${completionPercent}%` }}></div>
+                        </div>
+                        <span className="completion-text">{completionPercent}% complete</span>
+                    </div>
+                )}
+
+                {/* Section 2: Financial Snapshot */}
+                <section className="section">
+                    <h2 className="section-title">
+                        <DollarSign size={20} />
+                        Financial Snapshot
+                    </h2>
+                    <div className="snapshot-grid">
+                        <div className="snapshot-card income">
+                            <div className="card-icon"><TrendingUp size={24} /></div>
+                            <div className="card-content">
+                                <span className="card-label">Monthly Income</span>
+                                <span className="card-value">₹{monthlyIncome.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            {!profile?.gross_income && <span className="incomplete-badge">Incomplete</span>}
+                        </div>
+                        <div className="snapshot-card expenses">
+                            <div className="card-icon"><CreditCard size={24} /></div>
+                            <div className="card-content">
+                                <span className="card-label">Monthly Expenses</span>
+                                <span className="card-value">₹{monthlyExpenses.toLocaleString('en-IN')}</span>
+                            </div>
+                            {!profile?.fixed_expenses && <span className="incomplete-badge">Incomplete</span>}
+                        </div>
+                        <div className="snapshot-card emi">
+                            <div className="card-icon"><Wallet size={24} /></div>
+                            <div className="card-content">
+                                <span className="card-label">Monthly EMI</span>
+                                <span className="card-value">₹{monthlyEMI.toLocaleString('en-IN')}</span>
+                            </div>
+                        </div>
+                        <div className={`snapshot-card surplus ${netSurplus >= 0 ? 'positive' : 'negative'}`}>
+                            <div className="card-icon"><PiggyBank size={24} /></div>
+                            <div className="card-content">
+                                <span className="card-label">Net Surplus</span>
+                                <span className="card-value">₹{netSurplus.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            <span className="derived-badge">Derived</span>
                         </div>
                     </div>
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 rounded bg-slate-50 border border-slate-100">
-                            <div className="text-xs text-slate-500 uppercase font-bold">Assigned Persona</div>
-                            <div className="text-lg font-bold text-primary mt-1">
-                                {profile.persona_data?.persona?.name || 'Not Assigned'}
-                            </div>
-                            <div className="text-xs text-slate-400 mt-1">Based on Age & Income</div>
-                        </div>
+                </section>
 
-                        <div className="p-4 rounded bg-slate-50 border border-slate-100">
-                            <div className="text-xs text-slate-500 uppercase font-bold">Risk Appetite</div>
-                            <div className="text-lg font-bold text-slate-800 mt-1">
-                                {profile.risk_class || profile.persona_data?.persona?.risk_appetite || 'Unknown'}
-                            </div>
-                            <div className="text-xs text-slate-400 mt-1">From Survey & Behavior</div>
-                        </div>
-
-                        <div className="p-4 rounded bg-slate-50 border border-slate-100 flex flex-col justify-between">
-                            <div>
-                                <div className="text-xs text-slate-500 uppercase font-bold">Health Score</div>
-                                <div className="text-lg font-bold text-green-600 mt-1">
-                                    {profile.health_score || 0}/100
+                {/* Section 3: Assets & Protection */}
+                <section className="section">
+                    <h2 className="section-title">
+                        <Shield size={20} />
+                        Assets & Protection
+                    </h2>
+                    <div className="two-column-grid">
+                        {/* Left: Assets */}
+                        <div className="info-card">
+                            <h3 className="card-header">
+                                <PiggyBank size={18} />
+                                Assets
+                            </h3>
+                            <div className="info-rows">
+                                <div className="info-row">
+                                    <span className="label">Total Savings/Investments</span>
+                                    <span className="value">₹{existingAssets.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Emergency Fund</span>
+                                    <span className="value">
+                                        ₹{emergencyFund.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                                        <span className="subtext">({emergencyMonths.toFixed(1)} months)</span>
+                                    </span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Asset Diversification</span>
+                                    <span className={`status-chip ${diversification.toLowerCase()}`}>
+                                        {diversification}
+                                    </span>
                                 </div>
                             </div>
-                            <Link to="/risk-assessment" className="text-xs text-primary hover:underline mt-2 flex items-center gap-1">
-                                Retake Survey <ArrowRight size={10} />
-                            </Link>
+                        </div>
+
+                        {/* Right: Insurance */}
+                        <div className="info-card">
+                            <h3 className="card-header">
+                                <Umbrella size={18} />
+                                Insurance
+                            </h3>
+                            <div className="info-rows">
+                                <div className="info-row">
+                                    <span className="label">Annual Premium</span>
+                                    <span className="value">₹{insurancePremium.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Life Cover Amount</span>
+                                    <span className="value">₹{lifeCover.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="label">Coverage Status</span>
+                                    <span className={`status-chip ${coverageAdequacy === 'Adequate' ? 'good' : 'warning'}`}>
+                                        {coverageAdequacy}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-            </div>
+                {/* Section 4: Assessment & Persona Summary */}
+                <section className="section">
+                    <h2 className="section-title">
+                        <Target size={20} />
+                        Assessment Summary
+                    </h2>
+                    <div className="assessment-grid">
+                        <div className="assessment-card">
+                            <User size={24} className="icon" />
+                            <div className="content">
+                                <span className="label">Assigned Persona</span>
+                                <span className="value">{profile?.persona_data?.persona?.name || 'Not Assigned'}</span>
+                            </div>
+                            <Link to="/risk-assessment" className="card-link">
+                                View Details <ChevronRight size={14} />
+                            </Link>
+                        </div>
+                        <div className="assessment-card">
+                            <Shield size={24} className="icon" />
+                            <div className="content">
+                                <span className="label">Risk Appetite</span>
+                                <span className="value">{profile?.risk_class || profile?.persona_data?.persona?.risk_appetite || 'Unknown'}</span>
+                            </div>
+                            <Link to="/risk-assessment" className="card-link">
+                                <RefreshCw size={12} /> Retake Survey
+                            </Link>
+                        </div>
+                        <div className="assessment-card">
+                            <TrendingUp size={24} className="icon" />
+                            <div className="content">
+                                <span className="label">Health Score</span>
+                                <span className="value score">{profile?.health_score || 0}/100</span>
+                            </div>
+                            <Link to="/dashboard" className="card-link">
+                                View Breakdown <ChevronRight size={14} />
+                            </Link>
+                        </div>
+                        <div className="assessment-card">
+                            <Target size={24} className="icon" />
+                            <div className="content">
+                                <span className="label">Last Updated</span>
+                                <span className="value date">
+                                    {profile?.updated_at
+                                        ? new Date(profile.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                        : 'Never'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            {/* Edit Modal */}
+            {showEditModal && (
+                <ProfileEditModal
+                    profile={profile}
+                    onClose={() => setShowEditModal(false)}
+                    onSave={handleEditComplete}
+                />
+            )}
         </div>
     );
 };
-
-
 
 export default Profile;

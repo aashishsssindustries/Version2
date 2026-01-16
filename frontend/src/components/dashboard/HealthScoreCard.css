@@ -77,6 +77,50 @@
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
+/* Error State */
+.health-card-container.error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 400px;
+}
+
+.error-state {
+    padding: 32px;
+}
+
+.error-state svg {
+    color: #ef4444;
+    margin-bottom: 16px;
+}
+
+.error-state h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #b91c1c;
+    margin-bottom: 8px;
+}
+
+.error-state p {
+    font-size: 13px;
+    color: #dc2626;
+    margin-bottom: 24px;
+}
+
+/* Projected Note */
+.projected-note {
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+    padding: 8px 12px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
 /* Gauge Section */
 .gauge-section {
     display: flex;
