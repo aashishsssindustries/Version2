@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { Download, CheckCircle2, ArrowRight, Calculator, User, TrendingUp } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, ArrowRight, Calculator, User, TrendingUp } from 'lucide-react';
 import { profileService } from '../services/api';
 import './Dashboard.css';
 import { OnboardingWizard } from '../components/onboarding/OnboardingWizard';
@@ -8,17 +8,16 @@ import { InteractivePersonaCard } from '../components/dashboard/InteractivePerso
 import { HealthScoreCard } from '../components/dashboard/HealthScoreCard';
 import { ActionItemsGrid } from '../components/dashboard/ActionItemsGrid';
 import { ScoreTrendCard } from '../components/dashboard/ScoreTrendCard';
+
+import { DownloadReportButton } from '../components/reports/DownloadReportButton';
 import { checkProfileCompletion, getFlowGuardMessage } from '../utils/flowGuard';
 
 const Dashboard: React.FC = () => {
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showWizard, setShowWizard] = useState(false);
-    const [downloadingPDF, setDownloadingPDF] = useState(false);
-    const [pdfError, setPdfError] = useState('');
     const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     const fetchProfile = async () => {
@@ -56,50 +55,6 @@ const Dashboard: React.FC = () => {
 
     // Flow Guard Check
     const flowStatus = checkProfileCompletion(profile);
-
-    const handleDownloadPDF = async () => {
-        if (!flowStatus.canDownloadReport) {
-            setPdfError(getFlowGuardMessage(flowStatus));
-            return;
-        }
-
-        try {
-            setDownloadingPDF(true);
-            setPdfError('');
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}/pdf/advisory-report`,
-                {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/pdf' }
-                }
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to generate PDF');
-            }
-
-            const blob = await response.blob();
-            if (blob.type !== 'application/pdf') throw new Error('Invalid PDF received');
-
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `WealthMax_Advisory_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-
-        } catch (err: any) {
-            console.error('PDF Download Error:', err);
-            setPdfError(err.message || 'Failed to download PDF report');
-        } finally {
-            setDownloadingPDF(false);
-        }
-    };
 
     // Scroll to action items
     const scrollToActions = () => {
@@ -190,17 +145,13 @@ const Dashboard: React.FC = () => {
                     {/* Primary CTA */}
                     {renderPrimaryCTA()}
 
-                    {/* Download Report */}
-                    <button
-                        className={`download-btn ${!flowStatus.canDownloadReport ? 'disabled' : ''}`}
-                        onClick={handleDownloadPDF}
-                        disabled={downloadingPDF || !flowStatus.canDownloadReport}
-                        title={!flowStatus.canDownloadReport ? getFlowGuardMessage(flowStatus) : 'Download Advisory Report'}
-                    >
-                        <Download size={18} />
-                        {downloadingPDF ? 'Generating...' : 'Download Report'}
-                    </button>
-                    {pdfError && <p className="pdf-error">{pdfError}</p>}
+                    {/* Download Report V2 */}
+                    <DownloadReportButton
+                        flowStatus={{
+                            canDownloadReport: flowStatus.canDownloadReport,
+                            message: getFlowGuardMessage(flowStatus)
+                        }}
+                    />
                 </div>
             </header>
 
@@ -233,6 +184,8 @@ const Dashboard: React.FC = () => {
                 <section className="trend-section">
                     <ScoreTrendCard />
                 </section>
+
+
 
                 {/* Action Intelligence Section */}
                 <section className="action-section">
