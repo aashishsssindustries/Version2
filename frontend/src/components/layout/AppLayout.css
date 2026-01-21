@@ -1,29 +1,68 @@
+/* AppLayout - Enterprise Fintech Layout */
 .app-layout {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: var(--color-bg);
 }
 
+.app-layout.enterprise {
+    /* Enterprise mode with extended navigation - 
+       Additional enterprise-specific overrides can be added here */
+    position: relative;
+}
+
+/* Main Wrapper - Horizontal 3-Column Layout */
+.main-wrapper {
+    display: flex;
+    flex: 1;
+    margin-top: calc(var(--header-height) + 92px);
+    /* Header + TopNav + ContextBar */
+    min-height: calc(100vh - var(--header-height) - 92px);
+}
+
+/* Main Content Area */
 .main-content {
-    margin-top: var(--header-height);
-    margin-left: var(--sidebar-width);
-    min-height: calc(100vh - var(--header-height));
+    flex: 1;
+    /* margin-left: var(--sidebar-width); Removed as Sidebar is deleted */
+    margin-left: 0;
+    min-height: calc(100vh - var(--header-height) - 92px);
     background: var(--color-bg);
+    overflow-x: hidden;
 }
 
 .content-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: var(--spacing-2xl) var(--spacing-xl);
+    padding: var(--spacing-xl);
 }
 
 /* Responsive adjustments */
+@media (max-width: 1280px) {
+    .content-container {
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 1024px) {
+
+    /* Hide utility panel at this breakpoint via UtilityPanel.css */
+    .main-content {
+        margin-left: var(--sidebar-width);
+    }
+}
+
 @media (max-width: 768px) {
+    .main-wrapper {
+        margin-top: calc(var(--header-height) + 48px);
+        /* No context bar on mobile */
+    }
+
     .main-content {
         margin-left: 0;
     }
 
     .content-container {
-        padding: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-md);
     }
 }
