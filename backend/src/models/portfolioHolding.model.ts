@@ -1,4 +1,5 @@
 import db from '../config/database';
+import { HoldingSource, DEFAULT_HOLDING_SOURCE } from '../types/holdingSource';
 
 export interface PortfolioHolding {
     id: string;
@@ -7,6 +8,7 @@ export interface PortfolioHolding {
     quantity: number;
     average_price?: number;
     last_valuation?: number;
+    source?: HoldingSource;
     created_at: Date;
     updated_at: Date;
 }
@@ -16,6 +18,7 @@ export interface PortfolioHoldingWithMetadata extends PortfolioHolding {
     type: 'EQUITY' | 'MUTUAL_FUND';
     ticker?: string;
     current_nav?: number;
+    source: HoldingSource;
 }
 
 export class PortfolioHoldingModel {
@@ -26,7 +29,9 @@ export class PortfolioHoldingModel {
 
     static async findByPortfolioId(portfolioId: string): Promise<PortfolioHoldingWithMetadata[]> {
         const result = await db.query(
-            `SELECT ph.*, hm.name, hm.type, hm.ticker, hm.current_nav
+            `SELECT ph.id, ph.portfolio_id, ph.isin, ph.quantity, ph.average_price, 
+                    ph.last_valuation, ph.source, ph.created_at, ph.updated_at,
+                    hm.name, hm.type, hm.ticker, hm.current_nav
              FROM portfolio_holdings ph
              JOIN holding_metadata hm ON ph.isin = hm.isin
              WHERE ph.portfolio_id = $1
@@ -38,7 +43,9 @@ export class PortfolioHoldingModel {
 
     static async findByUserIdWithMetadata(userId: string): Promise<PortfolioHoldingWithMetadata[]> {
         const result = await db.query(
-            `SELECT ph.*, hm.name, hm.type, hm.ticker, hm.current_nav, up.portfolio_alias
+            `SELECT ph.id, ph.portfolio_id, ph.isin, ph.quantity, ph.average_price, 
+                    ph.last_valuation, ph.source, ph.created_at, ph.updated_at,
+                    hm.name, hm.type, hm.ticker, hm.current_nav, up.portfolio_alias
              FROM portfolio_holdings ph
              JOIN holding_metadata hm ON ph.isin = hm.isin
              JOIN user_portfolios up ON ph.portfolio_id = up.id
@@ -58,12 +65,13 @@ export class PortfolioHoldingModel {
     }
 
     static async create(holding: Partial<PortfolioHolding>): Promise<PortfolioHolding> {
-        const { portfolio_id, isin, quantity, average_price, last_valuation } = holding;
+        const { portfolio_id, isin, quantity, average_price, last_valuation, source } = holding;
+        const holdingSource = source || DEFAULT_HOLDING_SOURCE;
         const result = await db.query(
-            `INSERT INTO portfolio_holdings (portfolio_id, isin, quantity, average_price, last_valuation)
-             VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO portfolio_holdings (portfolio_id, isin, quantity, average_price, last_valuation, source)
+             VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING *`,
-            [portfolio_id, isin, quantity, average_price, last_valuation]
+            [portfolio_id, isin, quantity, average_price, last_valuation, holdingSource]
         );
         return result.rows[0];
     }

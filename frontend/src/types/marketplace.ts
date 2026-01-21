@@ -2,6 +2,8 @@ export type ProductCategory = 'SIP' | 'Term Insurance' | 'Tax Saving' | 'Retirem
 
 export type RiskLevel = 'Low' | 'Moderate' | 'High';
 
+export type AssetClass = 'Equity' | 'Debt' | 'Hybrid' | 'Gold' | 'Insurance' | 'Other';
+
 export interface Product {
     id: string;
     category: ProductCategory;
@@ -12,6 +14,13 @@ export interface Product {
     returns: string;
     tags: string[];
     suitablePersona?: string;
+    // Discovery fields
+    isin?: string;
+    schemeCode?: string;
+    fundHouse?: string;
+    assetClass?: AssetClass;
+    benchmark?: string;
+    expenseRatio?: number;
 }
 
 export interface ProductRecommendation extends Product {

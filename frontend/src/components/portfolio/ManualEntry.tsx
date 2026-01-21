@@ -7,7 +7,7 @@ interface ManualEntryProps {
 
 const ManualEntry: React.FC<ManualEntryProps> = ({ onAdd }) => {
     const [isin, setIsin] = useState('');
-    const [assetType, setAssetType] = useState<'EQUITY' | 'MUTUAL_FUND'>('EQUITY');
+    const [assetType, setAssetType] = useState<string>('');
     const [quantity, setQuantity] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -23,6 +23,11 @@ const ManualEntry: React.FC<ManualEntryProps> = ({ onAdd }) => {
         setSuccess('');
 
         // Validation
+        if (!assetType) {
+            setError('Please select an Asset Type');
+            return;
+        }
+
         if (!isin.trim()) {
             setError('ISIN is required');
             return;
@@ -44,7 +49,7 @@ const ManualEntry: React.FC<ManualEntryProps> = ({ onAdd }) => {
                 setSuccess(result.message);
                 setIsin('');
                 setQuantity('');
-                setAssetType('EQUITY');
+                setAssetType(''); // Reset to force explicit selection for next entry
             } else {
                 setError(result.message);
             }
@@ -77,13 +82,14 @@ const ManualEntry: React.FC<ManualEntryProps> = ({ onAdd }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="assetType">Asset Type</label>
+                    <label htmlFor="assetType">Asset Type <span className="text-red-500">*</span></label>
                     <select
                         id="assetType"
                         value={assetType}
-                        onChange={(e) => setAssetType(e.target.value as 'EQUITY' | 'MUTUAL_FUND')}
-                        className="form-select"
+                        onChange={(e) => setAssetType(e.target.value)}
+                        className={`form-select ${!assetType ? 'text-gray-500' : ''}`}
                     >
+                        <option value="" disabled>Select Asset Type</option>
                         <option value="EQUITY">Equity</option>
                         <option value="MUTUAL_FUND">Mutual Fund</option>
                     </select>

@@ -10,5 +10,6 @@ router.post('/update', authenticateToken, ProfileController.updateProfile);
 router.put('/action-items/:id/status', authenticateToken, ProfileController.updateActionItemStatus);
 router.get('/score-history', authenticateToken, ProfileController.getScoreHistory);
 router.get('/next-best-action', authenticateToken, ProfileController.getNextBestAction);
+router.get('/audit-logs', authenticateToken, ProfileController.getAuditLogs);
 
 export default router;

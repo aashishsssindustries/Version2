@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { SIPProjectionData, RetirementGlidePathData } from './projection.service';
 
 interface UserData {
     name: string;
@@ -39,12 +40,14 @@ interface CalculatorSummary {
         totalValue: number;
         investedAmount: number;
         estReturns: number;
+        yearlyData?: SIPProjectionData[];
     };
     retirement?: {
         yearsToRetire: number;
         targetCorpus: number;
         monthlySavingsRequired: number;
         gap: number;
+        yearlyData?: RetirementGlidePathData[];
     };
 }
 

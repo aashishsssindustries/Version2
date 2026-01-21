@@ -101,6 +101,10 @@ export const profileService = {
         const response = await apiClient.get(`/profile/score-history?limit=${limit}`);
         return response.data;
     },
+    getAuditLogs: async () => {
+        const response = await apiClient.get('/profile/audit-logs');
+        return response.data;
+    },
 };
 
 export const userService = {
@@ -133,6 +137,27 @@ export const marketplaceService = {
     getRecommendations: async () => {
         const response = await apiClient.get('/marketplace/recommendations');
         return response.data;
+    },
+    // Discovery APIs
+    getCatalog: async (filters?: any) => {
+        const response = await apiClient.get('/marketplace/catalog', { params: filters });
+        return response.data.data; // data.data because Controller wraps in data
+    },
+    getProductDetail: async (id: string) => {
+        const response = await apiClient.get(`/marketplace/catalog/${id}`);
+        return response.data.data;
+    },
+    searchProducts: async (query: string) => {
+        const response = await apiClient.get('/marketplace/search', { params: { q: query } });
+        return response.data.data;
+    },
+    getCategories: async () => {
+        const response = await apiClient.get('/marketplace/categories');
+        return response.data.data;
+    },
+    getFilters: async () => {
+        const response = await apiClient.get('/marketplace/filters');
+        return response.data.data;
     },
 };
 
@@ -230,11 +255,26 @@ export const portfolioService = {
         const response = await apiClient.post('/portfolio/upload-csv', { csv });
         return response.data;
     },
+    uploadCAS: async (file: File, password?: string) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (password) {
+            formData.append('password', password);
+        }
+        const response = await apiClient.post('/portfolio/upload-cas', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
     deleteHolding: async (holdingId: string) => {
         // Use axios directly to avoid the response interceptor unwrapping
         // Delete returns { success, message } not { success, data }
         const response = await apiClient.delete(`/portfolio/holdings/${holdingId}`);
         // The interceptor may have unwrapped, so check both scenarios
         return response.data ?? response;
+    },
+    getPortfolioAlignment: async () => {
+        const response = await apiClient.get('/portfolio/alignment');
+        return response.data;
     },
 };

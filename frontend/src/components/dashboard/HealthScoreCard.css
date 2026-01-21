@@ -410,3 +410,138 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Projected Ghost Ring */
+.gauge-projected {
+    fill: none;
+    stroke: rgba(34, 197, 94, 0.25);
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+/* Active stat chip */
+.stat-chip.projected.active {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Projected Score Preview Panel */
+.projected-preview {
+    padding: 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    animation: slideDown 0.3s ease;
+}
+
+.projected-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #16a34a;
+    margin-bottom: 12px;
+}
+
+.projected-comparison {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 12px;
+}
+
+.score-current,
+.score-projected {
+    text-align: center;
+}
+
+.score-current .score-number,
+.score-projected .score-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.score-current .score-number {
+    color: #64748b;
+}
+
+.score-projected .score-number {
+    color: #16a34a;
+}
+
+.score-projected.excellent .score-number {
+    color: #10b981;
+}
+
+.score-projected.good .score-number {
+    color: #3b82f6;
+}
+
+.score-current .score-label,
+.score-projected .score-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    color: #64748b;
+}
+
+.score-arrow {
+    font-size: 24px;
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.projected-bar {
+    position: relative;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.bar-current {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #4f46e5);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.bar-gain {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 0 4px 4px 0;
+    animation: pulseGain 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseGain {
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.projected-hint {
+    font-size: 12px;
+    color: #16a34a;
+    text-align: center;
+    margin: 0;
+}

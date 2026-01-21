@@ -18,6 +18,29 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex: 1;
+}
+
+.btn-import-portfolio {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.btn-import-portfolio:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .header-icon {
@@ -302,31 +325,69 @@
 /* Table */
 .holdings-table-wrapper {
     overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+    border-radius: 8px;
+    /* Rounded corners for the scroll area */
 }
 
 .holdings-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    /* Required for sticky header border spacing or just use collapse with care */
+    border-spacing: 0;
 }
 
 .holdings-table th {
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
     color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+    font-weight: 600;
 }
 
 .holdings-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
+    transition: background-color 0.2s;
+    font-variant-numeric: tabular-nums;
+}
+
+.holdings-table tbody tr {
+    transition: background-color 0.2s;
 }
 
 .holdings-table tbody tr:hover {
-    background: rgba(99, 102, 241, 0.03);
+    background: rgba(99, 102, 241, 0.04);
+}
+
+.holdings-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Top Holding Highlight */
+.holdings-table tbody tr.top-holding {
+    background: rgba(34, 197, 94, 0.02);
+    /* Very subtle green tint */
+}
+
+.holdings-table tbody tr.top-holding:hover {
+    background: rgba(34, 197, 94, 0.05);
+}
+
+.holdings-table tbody tr.top-holding td:first-child {
+    border-left: 4px solid #22c55e;
+    padding-left: calc(1rem - 4px);
+    /* Adjust padding to keep alignment */
 }
 
 .holding-name {
@@ -341,34 +402,42 @@
 .holding-name .isin {
     font-size: 0.75rem;
     color: var(--text-secondary);
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    margin-top: 2px;
 }
 
 .type-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
     font-weight: 600;
+    line-height: 1;
 }
 
 .type-badge.equity {
     background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    color: #16a34a;
+    /* Darker green for text */
 }
 
 .type-badge.mutual_fund {
     background: rgba(99, 102, 241, 0.1);
-    color: var(--primary);
+    color: #4f46e5;
+    /* Darker indigo for text */
 }
 
 .quantity {
     font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    /* Ensure tabular nums work well */
 }
 
 .valuation {
     font-weight: 600;
-    color: var(--primary);
+    color: #0f172a;
+    /* Darker text for value */
 }
 
 /* Empty & Loading States */
@@ -444,4 +513,91 @@
     .import-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Analytics Section */
+.analytics-section {
+    margin: 2rem 0;
+}
+
+.analytics-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Improved Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px dashed var(--border-color);
+}
+
+.empty-icon {
+    color: var(--text-secondary);
+    opacity: 0.3;
+    margin-bottom: 1.5rem;
+    width: 64px;
+    height: 64px;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    margin: 0 0 2rem 0;
+    color: var(--text-secondary);
+    max-width: 400px;
+}
+
+.btn-add-first {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    border-radius: 9999px;
+    /* Pill shape */
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-add-first:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
 }

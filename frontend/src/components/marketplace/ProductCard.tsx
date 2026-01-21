@@ -63,6 +63,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
             )}
 
+            {/* Product Metadata (New) */}
+            <div className="product-metadata">
+                {product.isin && (
+                    <div className="meta-badge isin-badge" title="ISIN Code">
+                        <Tag size={10} /> {product.isin}
+                    </div>
+                )}
+                {product.assetClass && (
+                    <div className="meta-badge asset-badge">
+                        {product.assetClass}
+                    </div>
+                )}
+                {product.fundHouse && (
+                    <div className="meta-badge fund-house-badge">
+                        {product.fundHouse}
+                    </div>
+                )}
+            </div>
+
             {/* Why Recommended */}
             {product.matchReason && (
                 <div className="match-reason">

@@ -3,6 +3,9 @@ import { UserPortfolioModel } from '../models/userPortfolio.model';
 import { PortfolioHoldingModel } from '../models/portfolioHolding.model';
 import { HoldingMetadataModel } from '../models/holdingMetadata.model';
 import { MutualFundService } from './mutualFund.service';
+import { computePortfolioAnalytics } from './portfolioAnalytics.service';
+import { HoldingInput, PortfolioAnalyticsResult } from '../types/portfolioAnalytics';
+import { HoldingSource } from '../types/holdingSource';
 import logger from '../config/logger';
 
 // ISIN validation regex: 2 uppercase letters + 9 alphanumeric + 1 check digit
@@ -141,15 +144,16 @@ export class PortfolioService {
             ? parseFloat((quantity * nav).toFixed(2))
             : undefined;
 
-        // Create holding with valuation
+        // Create holding with valuation and source
         const holding = await PortfolioHoldingModel.create({
             portfolio_id: portfolioId,
             isin,
             quantity,
-            last_valuation: valuation
+            last_valuation: valuation,
+            source: 'MANUAL' as HoldingSource
         });
 
-        logger.info(`Added holding ${isin} for user ${userId}`, { nav, valuation });
+        logger.info(`Added holding ${isin} for user ${userId}`, { nav, valuation, source: 'MANUAL' });
 
         return { success: true, message: 'Holding added successfully', data: holding };
     }
@@ -247,16 +251,21 @@ export class PortfolioService {
                 ? parseFloat((quantity * nav).toFixed(2))
                 : undefined;
 
-            // Create holding with valuation
+            // Create holding with valuation and source
             await PortfolioHoldingModel.create({
                 portfolio_id: portfolioId,
                 isin: row.isin,
                 quantity,
-                last_valuation: valuation
+                last_valuation: valuation,
+                source: 'CSV' as HoldingSource
             });
 
             imported++;
         }
+
+        // Update sync metadata
+        const syncStatus = errors.length > 0 ? 'PARTIAL' : 'SUCCESS';
+        await UserPortfolioModel.updateSyncStatus(portfolioId, syncStatus, 'CSV');
 
         logger.info(`CSV import: ${imported} holdings for user ${userId}`);
 
@@ -298,15 +307,134 @@ export class PortfolioService {
     }
 
     /**
-     * Get portfolio summary (total valuation)
+     * Get portfolio summary (total valuation) with sync metadata
      */
-    static async getPortfolioSummary(userId: string): Promise<{ totalValuation: number; holdingsCount: number }> {
+    static async getPortfolioSummary(userId: string): Promise<{
+        totalValuation: number;
+        holdingsCount: number;
+        syncMetadata?: {
+            last_synced_at: Date;
+            sync_status: string;
+            sync_source: string;
+        };
+    }> {
         const holdings = await this.getHoldings(userId);
         const totalValuation = await PortfolioHoldingModel.getTotalValuationByUserId(userId);
 
+        // Get sync metadata from user's default portfolio
+        const portfolios = await UserPortfolioModel.findByUserId(userId);
+        let syncMetadata = undefined;
+        if (portfolios.length > 0) {
+            const metadata = await UserPortfolioModel.getSyncMetadata(portfolios[0].id);
+            if (metadata) {
+                syncMetadata = metadata;
+            }
+        }
+
         return {
             totalValuation,
-            holdingsCount: holdings.length
+            holdingsCount: holdings.length,
+            syncMetadata
         };
     }
+
+    /**
+     * Get comprehensive portfolio analytics
+     * Stateless computation - reusable for reports
+     */
+    static async getPortfolioAnalytics(userId: string): Promise<PortfolioAnalyticsResult> {
+        // Fetch holdings with metadata
+        const rawHoldings = await this.getHoldings(userId);
+
+        // Transform to analytics input format
+        const holdingInputs: HoldingInput[] = rawHoldings.map(h => ({
+            isin: h.isin,
+            quantity: parseFloat(h.quantity) || 0,
+            average_price: h.average_price ? parseFloat(h.average_price) : undefined,
+            last_valuation: h.last_valuation ? parseFloat(h.last_valuation) : undefined,
+            name: h.name,
+            type: h.type as 'EQUITY' | 'MUTUAL_FUND',
+            category: h.category || 'Uncategorized',
+            current_nav: h.current_nav ? parseFloat(h.current_nav) : undefined
+        }));
+
+        // Compute analytics using stateless engine
+        const analytics = computePortfolioAnalytics(holdingInputs);
+
+        logger.info(`Computed portfolio analytics for user ${userId}`, {
+            totalValue: analytics.totalValue,
+            holdingsCount: analytics.holdingDetails.length,
+            riskFlags: analytics.concentrationRisks.length
+        });
+
+        return analytics;
+    }
+
+    /**
+     * Upload holdings from CAS PDF
+     */
+    static async uploadCASHoldings(
+        userId: string,
+        casHoldings: Array<{ isin: string; schemeName: string; units: number; nav?: number; value?: number }>
+    ): Promise<{ imported: number; skipped: number; errors: string[] }> {
+        const errors: string[] = [];
+        let imported = 0;
+        let skipped = 0;
+
+        const portfolioId = await this.getOrCreateDefaultPortfolio(userId);
+
+        for (const holding of casHoldings) {
+            const { isin, schemeName, units, nav, value } = holding;
+
+            // Validate ISIN
+            if (!this.isValidISIN(isin)) {
+                errors.push(`Invalid ISIN format: ${isin}`);
+                skipped++;
+                continue;
+            }
+
+            // Check for duplicate
+            if (await this.isDuplicateISIN(userId, isin)) {
+                errors.push(`Skipped duplicate ISIN: ${isin}`);
+                skipped++;
+                continue;
+            }
+
+            // Ensure metadata exists
+            const existing = await HoldingMetadataModel.findByIsin(isin);
+            if (!existing) {
+                // Create metadata from CAS data
+                await HoldingMetadataModel.create({
+                    isin,
+                    name: schemeName,
+                    type: 'MUTUAL_FUND',
+                    current_nav: nav,
+                    nav_date: nav ? new Date() : undefined
+                });
+            }
+
+            // Compute valuation
+            const valuation = value || (nav && units ? parseFloat((units * nav).toFixed(2)) : undefined);
+
+            // Create holding with source = 'CAS'
+            await PortfolioHoldingModel.create({
+                portfolio_id: portfolioId,
+                isin,
+                quantity: units,
+                last_valuation: valuation,
+                source: 'CAS' as HoldingSource
+            });
+
+            imported++;
+        }
+
+        // Update sync metadata
+        const syncStatus = errors.length > 0 ? (imported > 0 ? 'PARTIAL' : 'FAILED') : 'SUCCESS';
+        await UserPortfolioModel.updateSyncStatus(portfolioId, syncStatus, 'CAS');
+
+        logger.info(`CAS import: ${imported} holdings for user ${userId}`, { skipped, errors: errors.length });
+
+        return { imported, skipped, errors };
+    }
 }
+

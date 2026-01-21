@@ -10,8 +10,14 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         riskLevel: 'Low',
         minInvestment: 500,
         returns: '10-12% p.a.',
-        tags: ['stable', 'long-term', 'equity'],
-        suitablePersona: 'Conservative Investors'
+        tags: ['stable', 'long-term', 'equity', 'index'],
+        suitablePersona: 'Conservative Investors',
+        isin: 'INF200K01VL4',
+        schemeCode: '119551',
+        fundHouse: 'UTI AMC',
+        assetClass: 'Equity',
+        benchmark: 'Nifty 50 TRI',
+        expenseRatio: 0.10
     },
     {
         id: 'mf-midcap',
@@ -21,8 +27,14 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         riskLevel: 'Moderate',
         minInvestment: 1000,
         returns: '14-16% p.a.',
-        tags: ['growth', 'high-return', 'equity'],
-        suitablePersona: 'Moderate Risk Takers'
+        tags: ['growth', 'high-return', 'equity', 'midcap'],
+        suitablePersona: 'Moderate Risk Takers',
+        isin: 'INF179K01BQ2',
+        schemeCode: '120503',
+        fundHouse: 'HDFC AMC',
+        assetClass: 'Equity',
+        benchmark: 'Nifty Midcap 150 TRI',
+        expenseRatio: 0.75
     },
     {
         id: 'mf-smallcap',
@@ -32,8 +44,14 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         riskLevel: 'High',
         minInvestment: 1000,
         returns: '18-22% p.a.',
-        tags: ['aggressive', 'multi-bagger', 'equity'],
-        suitablePersona: 'Aggressive Investors'
+        tags: ['aggressive', 'multi-bagger', 'equity', 'smallcap'],
+        suitablePersona: 'Aggressive Investors',
+        isin: 'INF109K01Z67',
+        schemeCode: '125354',
+        fundHouse: 'ICICI Prudential',
+        assetClass: 'Equity',
+        benchmark: 'Nifty Smallcap 250 TRI',
+        expenseRatio: 0.65
     },
 
     // --- Term Insurance ---
@@ -43,10 +61,11 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         name: 'Pure Life Term Plan',
         description: 'High life cover at affordable premiums. Essential for every breadwinner.',
         riskLevel: 'Low',
-        minInvestment: 500, // Monthly premium approx
+        minInvestment: 500,
         returns: 'Life Cover',
         tags: ['safety', 'family-protection', 'tax-saving'],
-        suitablePersona: 'Breadwinners & Families'
+        suitablePersona: 'Breadwinners & Families',
+        assetClass: 'Insurance'
     },
     {
         id: 'ins-term-rop',
@@ -57,7 +76,8 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         minInvestment: 1200,
         returns: 'Premium Back',
         tags: ['safety', 'money-back'],
-        suitablePersona: 'Value Seekers'
+        suitablePersona: 'Value Seekers',
+        assetClass: 'Insurance'
     },
 
     // --- Tax Saving ---
@@ -69,8 +89,14 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         riskLevel: 'Moderate',
         minInvestment: 500,
         returns: '12-15% p.a.',
-        tags: ['tax-saving', '80c', 'equity'],
-        suitablePersona: 'Salaried Professionals'
+        tags: ['tax-saving', '80c', 'equity', 'elss'],
+        suitablePersona: 'Salaried Professionals',
+        isin: 'INF090I01FN4',
+        schemeCode: '118989',
+        fundHouse: 'Axis AMC',
+        assetClass: 'Equity',
+        benchmark: 'Nifty 500 TRI',
+        expenseRatio: 0.58
     },
     {
         id: 'tax-ppf',
@@ -81,18 +107,20 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         minInvestment: 500,
         returns: '7.1% p.a.',
         tags: ['govt-backed', 'risk-free', '80c'],
-        suitablePersona: 'Conservative Savers'
+        suitablePersona: 'Conservative Savers',
+        assetClass: 'Debt'
     },
     {
         id: 'tax-nps',
-        category: 'Retirement', // Also Tax Saving
+        category: 'Retirement',
         name: 'National Pension System (NPS)',
         description: 'Save for retirement with additional tax benefits under 80CCD.',
         riskLevel: 'Moderate',
         minInvestment: 500,
         returns: '9-11% p.a.',
         tags: ['retirement', 'tax-saving', 'pension'],
-        suitablePersona: 'Long-term Planners'
+        suitablePersona: 'Long-term Planners',
+        assetClass: 'Hybrid'
     },
 
     // --- Safe / Liquid ---
@@ -104,8 +132,14 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         riskLevel: 'Low',
         minInvestment: 100,
         returns: '6-7% p.a.',
-        tags: ['emergency-fund', 'short-term'],
-        suitablePersona: 'Everyone'
+        tags: ['emergency-fund', 'short-term', 'liquid'],
+        suitablePersona: 'Everyone',
+        isin: 'INF179K01EQ6',
+        schemeCode: '118551',
+        fundHouse: 'HDFC AMC',
+        assetClass: 'Debt',
+        benchmark: 'CRISIL Liquid Fund Index',
+        expenseRatio: 0.20
     },
     {
         id: 'gold-bond',
@@ -113,9 +147,11 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         name: 'Sovereign Gold Bond (SGB)',
         description: 'Earn 2.5% interest + Gold price appreciation. No making charges.',
         riskLevel: 'Low',
-        minInvestment: 5000, // Approx 1gm
+        minInvestment: 5000,
         returns: 'Gold + 2.5%',
         tags: ['gold', 'govt-backed'],
-        suitablePersona: 'Diversifiers'
+        suitablePersona: 'Diversifiers',
+        assetClass: 'Gold'
     }
 ];
+

@@ -17,14 +17,28 @@ export interface User {
     updated_at: Date;
 }
 
+import { EncryptionService } from '../services/encryption.service';
+import crypto from 'crypto';
+
 export class UserModel {
     static async create(user: Partial<User>): Promise<User> {
-        const { email, mobile, name, pan, pan_digest, password_hash, role } = user;
+        const { email, mobile, name, pan, password_hash, role } = user;
+
+        let encryptedPan = pan;
+        let panDigest = user.pan_digest;
+
+        if (pan) {
+            // Encrypt PAN
+            encryptedPan = EncryptionService.encrypt(pan) || undefined;
+            // Generate SHA-256 digest for lookup/uniqueness check
+            panDigest = crypto.createHash('sha256').update(pan).digest('hex');
+        }
+
         const result = await db.query(
             `INSERT INTO users (email, mobile, name, pan, pan_digest, password_hash, role)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-            [email, mobile, name, pan, pan_digest, password_hash, role || 'user']
+            [email, mobile, name, encryptedPan, panDigest, password_hash, role || 'user']
         );
         return result.rows[0];
     }

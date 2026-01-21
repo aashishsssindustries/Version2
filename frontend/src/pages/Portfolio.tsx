@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Briefcase, Trash2, TrendingUp, AlertCircle } from 'lucide-react';
+import { Briefcase, Trash2, TrendingUp, AlertCircle, BarChart3, Plus, Download } from 'lucide-react';
 import ManualEntry from '../components/portfolio/ManualEntry';
 import CsvUpload from '../components/portfolio/CsvUpload';
+import AllocationChart from '../components/portfolio/AllocationChart';
+import HoldingsBarChart from '../components/portfolio/HoldingsBarChart';
+import PortfolioTreemap from '../components/portfolio/PortfolioTreemap';
+import ImportPortfolioModal from '../components/portfolio/ImportPortfolioModal';
 import { portfolioService } from '../services/api';
+import PortfolioHealthSummary from '../components/portfolio/PortfolioHealthSummary';
+import PortfolioSkeleton from '../components/portfolio/PortfolioSkeleton';
 import './Portfolio.css';
+import '../components/portfolio/PortfolioCharts.css';
 
 interface Holding {
     id: string;
@@ -27,6 +34,7 @@ const Portfolio: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+    const [showImportModal, setShowImportModal] = useState(false);
 
     const fetchHoldings = async () => {
         try {
@@ -57,6 +65,14 @@ const Portfolio: React.FC = () => {
     const handleCsvUpload = async (csv: string) => {
         const result = await portfolioService.uploadCSV(csv);
         if (result.success || result.imported > 0) {
+            fetchHoldings();
+        }
+        return result;
+    };
+
+    const handleCasUpload = async (file: File, password?: string) => {
+        const result = await portfolioService.uploadCAS(file, password);
+        if (result.success || result.data?.imported > 0) {
             fetchHoldings();
         }
         return result;
@@ -98,30 +114,46 @@ const Portfolio: React.FC = () => {
         return rounded.toFixed(4).replace(/\.?0+$/, '');
     };
 
+    const topHoldingId = holdings.length > 0
+        ? holdings.reduce((prev, current) => (prev.last_valuation || 0) > (current.last_valuation || 0) ? prev : current).id
+        : null;
+
+    if (loading) {
+        return <PortfolioSkeleton />;
+    }
+
     return (
         <div className="portfolio-container">
             {/* Header */}
-            <div className="portfolio-header">
-                <div className="header-content">
+            <div className="portfolio-header mb-6">
+                <div className="header-content mb-6">
                     <Briefcase size={28} className="header-icon" />
                     <div>
                         <h1>My Portfolio</h1>
                         <p className="subtitle">Track your investments in one place (read-only)</p>
                     </div>
+                    <button className="btn-import-portfolio" onClick={() => setShowImportModal(true)}>
+                        <Download size={18} />
+                        Import Portfolio
+                    </button>
                 </div>
 
-                {/* Summary Stats */}
-                <div className="portfolio-stats">
-                    <div className="stat-card">
-                        <span className="stat-label">Total Holdings</span>
-                        <span className="stat-value">{summary.holdingsCount}</span>
-                    </div>
-                    <div className="stat-card">
-                        <span className="stat-label">Total Valuation</span>
-                        <span className="stat-value">{formatCurrency(summary.totalValuation)}</span>
-                    </div>
-                </div>
+                {/* New Health Summary Strip */}
+                <PortfolioHealthSummary
+                    holdings={holdings}
+                    totalValuation={summary.totalValuation}
+                />
             </div>
+
+            {/* Import Modal */}
+            {showImportModal && (
+                <ImportPortfolioModal
+                    onClose={() => setShowImportModal(false)}
+                    onManualAdd={handleManualAdd}
+                    onCsvUpload={handleCsvUpload}
+                    onCasUpload={handleCasUpload}
+                />
+            )}
 
             {/* Import Section */}
             <div className="import-section">
@@ -141,6 +173,24 @@ const Portfolio: React.FC = () => {
                 </div>
             )}
 
+            {/* Analytics Charts */}
+            {!loading && holdings.length > 0 && (
+                <div className="analytics-section">
+                    <div className="section-header mb-4">
+                        <h2 className="flex items-center gap-2 mb-1">
+                            <BarChart3 size={20} />
+                            Portfolio Analytics
+                        </h2>
+                        <p className="text-sm text-gray-500 ml-7">Visual insights into your asset allocation and performance.</p>
+                    </div>
+                    <div className="charts-grid">
+                        <AllocationChart holdings={holdings} />
+                        <HoldingsBarChart holdings={holdings} />
+                        <PortfolioTreemap holdings={holdings} />
+                    </div>
+                </div>
+            )}
+
             {/* Holdings Table */}
             <div className="holdings-section">
                 <h2>
@@ -148,16 +198,18 @@ const Portfolio: React.FC = () => {
                     Your Holdings
                 </h2>
 
-                {loading ? (
-                    <div className="loading-state">
-                        <div className="spinner"></div>
-                        <p>Loading holdings...</p>
-                    </div>
-                ) : holdings.length === 0 ? (
+                {holdings.length === 0 ? (
                     <div className="empty-state">
-                        <Briefcase size={48} className="empty-icon" />
+                        <Briefcase size={64} strokeWidth={1} className="empty-icon" />
                         <h3>No Holdings Yet</h3>
-                        <p>Add your first holding using the form above or upload a CSV file.</p>
+                        <p>Your portfolio is currently empty. Add your first investment to start tracking your wealth journey.</p>
+                        <button
+                            className="btn-add-first"
+                            onClick={() => document.querySelector('.manual-entry-card')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            <Plus size={18} />
+                            Add Investment
+                        </button>
                     </div>
                 ) : (
                     <div className="holdings-table-wrapper">
@@ -174,7 +226,10 @@ const Portfolio: React.FC = () => {
                             </thead>
                             <tbody>
                                 {holdings.map((holding) => (
-                                    <tr key={holding.id}>
+                                    <tr
+                                        key={holding.id}
+                                        className={holding.id === topHoldingId ? 'top-holding' : ''}
+                                    >
                                         <td>
                                             <div className="holding-name">
                                                 <span className="name">{holding.name}</span>

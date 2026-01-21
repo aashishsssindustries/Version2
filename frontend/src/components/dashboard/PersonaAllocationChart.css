@@ -1,0 +1,266 @@
+.persona-allocation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.persona-allocation-svg {
+    display: block;
+}
+
+/* Segments */
+.segment {
+    transition: all 0.2s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.segment.active {
+    transform-origin: center;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    opacity: 1;
+}
+
+.segment.dimmed {
+    opacity: 0.4;
+}
+
+/* Center text */
+.center-title {
+    font-size: 14px;
+    font-weight: 700;
+    fill: #1e293b;
+}
+
+.center-subtitle {
+    font-size: 10px;
+    fill: #64748b;
+}
+
+/* Segment labels */
+.segment-label {
+    font-size: 11px;
+    font-weight: 700;
+    fill: white;
+    pointer-events: none;
+}
+
+/* Legend */
+.allocation-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    max-width: 280px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.legend-item:hover,
+.legend-item.active {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.legend-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.legend-percent {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+/* Tooltip */
+.allocation-tooltip {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(100% + 16px));
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e2e8f0;
+    width: 280px;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(calc(100% + 20px));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(calc(100% + 16px));
+    }
+}
+
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid;
+}
+
+.tooltip-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.tooltip-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    flex: 1;
+}
+
+.tooltip-percent {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.tooltip-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.tooltip-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.example-tag {
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    color: #475569;
+}
+
+/* Actual vs Ideal Comparison */
+.actual-comparison {
+    width: 100%;
+    max-width: 320px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+.actual-comparison h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 12px 0;
+}
+
+.comparison-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.comparison-row:last-child {
+    margin-bottom: 0;
+}
+
+.comp-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    width: 70px;
+}
+
+.comp-bars {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bar-ideal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 4px;
+    opacity: 0.3;
+}
+
+.bar-actual {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.bar-actual.ok {
+    background: #22c55e;
+}
+
+.bar-actual.over {
+    background: #f59e0b;
+}
+
+.bar-actual.under {
+    background: #3b82f6;
+}
+
+.comp-diff {
+    font-size: 11px;
+    font-weight: 700;
+    width: 36px;
+    text-align: right;
+}
+
+.comp-diff.ok {
+    color: #22c55e;
+}
+
+.comp-diff.over {
+    color: #f59e0b;
+}
+
+.comp-diff.under {
+    color: #3b82f6;
+}
+
+/* Make container relative for tooltip positioning */
+.persona-allocation-container {
+    position: relative;
+}

@@ -55,6 +55,17 @@ export class ProfileController {
                 logger.debug('Profile created successfully', { userId });
             }
 
+            // [COMPLIANCE] Audit Log
+            const { AuditService } = await import('../services/audit.service');
+            await AuditService.log({
+                userId,
+                action: existing ? 'UPDATE_PROFILE' : 'CREATE_PROFILE',
+                resource: 'profile',
+                details: { riskClass, persona: analysis?.persona?.name },
+                ipAddress: req.ip,
+                userAgent: req.get('User-Agent')
+            });
+
             // 3. Extract Recommendations and Save Action Items (non-blocking)
             const recommendations = analysis.recommendations || [];
             try {
@@ -261,6 +272,27 @@ export class ProfileController {
             return res.status(500).json({
                 success: false,
                 message: 'Failed to fetch score history'
+            });
+        }
+    }
+    /**
+     * Get accessible audit logs for the user
+     */
+    static async getAuditLogs(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user.id;
+            const { AuditService } = await import('../services/audit.service');
+            const logs = await AuditService.getLogsByUser(userId);
+
+            return res.json({
+                success: true,
+                data: logs
+            });
+        } catch (error: any) {
+            logger.error('Get Audit Logs Error', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to fetch security logs'
             });
         }
     }

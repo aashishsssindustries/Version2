@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, ChevronDown, ChevronUp, Zap, Target, Users, ChevronRight, BookOpen, Wallet, Shield, AlertTriangle } from 'lucide-react';
+import { TrendingUp, ChevronDown, ChevronUp, Zap, Target, Users, ChevronRight, BookOpen, Wallet, Shield, AlertTriangle, Sparkles } from 'lucide-react';
 import './HealthScoreCard.css';
 
 interface HealthScoreCardProps {
@@ -16,8 +16,42 @@ interface ScoreFactor {
     icon: React.ReactNode;
 }
 
+// Animated counter hook
+const useAnimatedCounter = (endValue: number, duration: number = 1500) => {
+    const [count, setCount] = useState(0);
+    const prevValueRef = useRef(0);
+
+    useEffect(() => {
+        const startValue = prevValueRef.current;
+        const diff = endValue - startValue;
+        const startTime = performance.now();
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function (ease-out-cubic)
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const currentValue = Math.round(startValue + diff * eased);
+
+            setCount(currentValue);
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                prevValueRef.current = endValue;
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }, [endValue, duration]);
+
+    return count;
+};
+
 export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => {
     const [showBreakdown, setShowBreakdown] = useState(false);
+    const [showProjection, setShowProjection] = useState(false);
 
     // Locked state for no profile
     if (!profile) {
@@ -113,6 +147,9 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
     const backendScore = profile.health_score || 0;
     const displayScore = backendScore > 0 ? backendScore : componentSum;
 
+    // Animated score display
+    const animatedScore = useAnimatedCounter(displayScore);
+
     // For display purposes, normalize breakdown to match displayed score
     const scaleFactor = displayScore > 0 && componentSum > 0 ? displayScore / componentSum : 1;
     const normalizedFactors = factors.map(f => ({
@@ -123,8 +160,9 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
     // Validation: only fail if no data at all
     const isValid = displayScore > 0 || profile.gross_income > 0;
 
-    // Percentile (derived from score)
-    const percentile = Math.min(99, Math.max(1, Math.round((displayScore / 100) * 80 + 10)));
+    // Percentile (derived from score + gamification data)
+    const gamification = profile.gamification || {};
+    const percentile = gamification.percentile || Math.min(99, Math.max(1, Math.round((displayScore / 100) * 80 + 10)));
 
     // Projected score from action items
     const actionItems = profile.action_items || [];
@@ -134,6 +172,7 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
     const projectedGain = highPriorityItems.reduce((sum: number, item: any) =>
         sum + (item.estimated_score_impact || 0), 0
     );
+    const projectedScore = Math.min(100, displayScore + projectedGain);
 
     // Score label
     const getScoreLabel = (score: number) => {
@@ -144,8 +183,10 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
     };
 
     const scoreInfo = getScoreLabel(displayScore);
+    const projectedInfo = getScoreLabel(projectedScore);
     const circumference = 2 * Math.PI * 80;
     const progress = (displayScore / 100) * circumference;
+    const projectedProgress = (projectedScore / 100) * circumference;
 
     // Validation failed fallback
     if (!isValid) {
@@ -170,6 +211,16 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
             <div className="gauge-section">
                 <svg viewBox="0 0 200 200" className="gauge-svg">
                     <circle cx="100" cy="100" r="80" className="gauge-bg" />
+                    {/* Projected score ghost ring */}
+                    {projectedGain > 0 && showProjection && (
+                        <circle
+                            cx="100" cy="100" r="80"
+                            className="gauge-projected"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - projectedProgress}
+                            transform="rotate(-90 100 100)"
+                        />
+                    )}
                     <circle
                         cx="100" cy="100" r="80"
                         className={`gauge-progress ${scoreInfo.class}`}
@@ -177,7 +228,7 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
                         strokeDashoffset={circumference - progress}
                         transform="rotate(-90 100 100)"
                     />
-                    <text x="100" y="90" className="gauge-score">{displayScore}</text>
+                    <text x="100" y="90" className="gauge-score">{animatedScore}</text>
                     <text x="100" y="115" className="gauge-max">/100</text>
                     <text x="100" y="140" className={`gauge-label ${scoreInfo.class}`}>{scoreInfo.label}</text>
                 </svg>
@@ -189,10 +240,14 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
                     <Users size={14} />
                     <div>
                         <span className="stat-value">Top {100 - percentile}%</span>
-                        <span className="stat-label">vs similar users</span>
+                        <span className="stat-label">{gamification.benchmark || 'vs similar users'}</span>
                     </div>
                 </div>
-                <div className="stat-chip projected">
+                <div
+                    className={`stat-chip projected ${showProjection ? 'active' : ''}`}
+                    onClick={() => setShowProjection(!showProjection)}
+                    style={{ cursor: 'pointer' }}
+                >
                     <Zap size={14} />
                     <div>
                         <span className="stat-value">+{projectedGain} pts</span>
@@ -201,10 +256,31 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({ profile }) => 
                 </div>
             </div>
 
-            {/* Projected Score Note */}
-            {projectedGain > 0 && (
-                <div className="projected-note">
-                    Projected score assumes all high-priority actions are completed.
+            {/* Projected Score Preview */}
+            {projectedGain > 0 && showProjection && (
+                <div className="projected-preview">
+                    <div className="projected-header">
+                        <Sparkles size={16} />
+                        <span>Projected Score Preview</span>
+                    </div>
+                    <div className="projected-comparison">
+                        <div className="score-current">
+                            <span className="score-number">{displayScore}</span>
+                            <span className="score-label">Current</span>
+                        </div>
+                        <div className="score-arrow">→</div>
+                        <div className={`score-projected ${projectedInfo.class}`}>
+                            <span className="score-number">{projectedScore}</span>
+                            <span className="score-label">{projectedInfo.label}</span>
+                        </div>
+                    </div>
+                    <div className="projected-bar">
+                        <div className="bar-current" style={{ width: `${displayScore}%` }}></div>
+                        <div className="bar-gain" style={{ left: `${displayScore}%`, width: `${projectedGain}%` }}></div>
+                    </div>
+                    <p className="projected-hint">
+                        Complete {highPriorityItems.length} high-priority action{highPriorityItems.length !== 1 ? 's' : ''} to reach this score.
+                    </p>
                 </div>
             )}
 
