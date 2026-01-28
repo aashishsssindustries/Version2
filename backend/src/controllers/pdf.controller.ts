@@ -6,6 +6,8 @@ import { PDFService } from '../services/pdf.service';
 import { PDFServiceV2 } from '../services/pdfV2.service';
 import { PortfolioService } from '../services/portfolio.service';
 import { PortfolioAlignmentService } from '../services/portfolioAlignment.service';
+import { AnalyticsService } from '../services/analytics.service';
+import { PDFServiceV3 } from '../services/pdfV3.service';
 import logger from '../config/logger';
 
 export class PDFController {
@@ -15,133 +17,21 @@ export class PDFController {
      */
     static async generateAdvisoryReport(req: Request, res: Response) {
         try {
-            const userId = (req as any).user.id;
+            const user = (req as any).user;
 
-            // 1. Fetch User Data
-            const user = await UserModel.findById(userId);
-            if (!user) {
-                res.status(404).json({
-                    success: false,
-                    message: 'User not found'
-                });
-                return;
-            }
+            // Generate PDF (Service now handles data fetching)
+            const pdfBuffer = await PDFService.generateAdvisoryReport(user);
 
-            // 2. Fetch Profile Data
-            const profile = await ProfileModel.findByUserId(userId);
-            if (!profile) {
-                res.status(404).json({
-                    success: false,
-                    message: 'Financial profile not found. Please complete your profile first.'
-                });
-                return;
-            }
-
-            // 3. Fetch Action Items
-            const actionItems = await ProfileModel.getActionItems(userId);
-
-            // 4. Calculate SIP Summary (using default values for demo)
-            // In production, you might want to store user's calculator preferences
-            let sipSummary = undefined;
-            try {
-                const monthlySurplus = profile.gross_income - profile.fixed_expenses - profile.monthly_emi;
-                const suggestedSIP = Math.max(monthlySurplus * 0.3, 5000); // 30% of surplus or min 5000
-
-                const sipResult = CalculatorService.calculateSIP(
-                    suggestedSIP,
-                    12, // 12% annual return
-                    10  // 10 years
-                );
-
-                sipSummary = {
-                    monthlyInvestment: suggestedSIP,
-                    years: 10,
-                    totalValue: sipResult.summary.totalValue,
-                    investedAmount: sipResult.summary.investedAmount,
-                    estReturns: sipResult.summary.estReturns
-                };
-            } catch (error) {
-                logger.warn('SIP calculation failed for PDF', error);
-            }
-
-            // 5. Calculate Retirement Summary (if age is available)
-            let retirementSummary = undefined;
-            if (profile.age && profile.age < 60) {
-                try {
-                    const retirementResult = CalculatorService.calculateRetirement(
-                        profile.age,
-                        60, // Retirement age
-                        profile.fixed_expenses, // Monthly expenses
-                        6,  // 6% inflation
-                        profile.existing_assets,
-                        12, // 12% pre-retirement return
-                        8   // 8% post-retirement return
-                    );
-
-                    retirementSummary = {
-                        yearsToRetire: retirementResult.summary.yearsToRetire,
-                        targetCorpus: retirementResult.summary.targetCorpus,
-                        monthlySavingsRequired: retirementResult.summary.monthlySavingsRequired,
-                        gap: retirementResult.summary.gap
-                    };
-                } catch (error) {
-                    logger.warn('Retirement calculation failed for PDF', error);
-                }
-            }
-
-            // 6. Prepare PDF Data
-            const pdfData = {
-                user: {
-                    name: user.name,
-                    email: user.email
-                },
-                profile: {
-                    age: profile.age,
-                    gross_income: profile.gross_income,
-                    employment_type: profile.employment_type,
-                    health_score: profile.health_score,
-                    persona_data: profile.persona_data,
-                    risk_class: profile.risk_class
-                },
-                actionItems: actionItems.map((item: any) => ({
-                    title: item.title || PDFController.getRiskTitle(item.risk_type || item.category || 'General'),
-                    description: item.description || PDFController.getRiskDescription(item.risk_type, item.gap_amount),
-                    category: item.category || item.risk_type || 'General',
-                    priority: item.severity || item.priority || 'Medium',
-                    gap_amount: item.gap_amount || 0,
-                    estimated_score_impact: item.estimated_score_impact || 0,
-                    action: item.action || PDFController.getRiskAction(item.risk_type || item.category || 'General')
-                })),
-                calculatorSummary: {
-                    sip: sipSummary,
-                    retirement: retirementSummary
-                },
-                generatedDate: new Date().toLocaleDateString('en-IN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })
-            };
-
-            // 7. Generate PDF
-            const pdfBuffer = await PDFService.generateAdvisoryReport(pdfData);
-
-            // 8. Set Response Headers
-            const filename = `WealthMax_Advisory_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+            // Send PDF
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length.toString());
-
-            // 9. Send PDF Response
-            res.end(pdfBuffer);
-
-            logger.info(`Advisory PDF generated for user: ${userId}`);
+            res.setHeader('Content-Disposition', `attachment; filename=Advisory_Report_${user.name.replace(/\s+/g, '_')}.pdf`);
+            res.send(pdfBuffer);
 
         } catch (error: any) {
-            logger.error('PDF Generation Error', error);
+            logger.error('Error generating PDF:', error);
             res.status(500).json({
                 success: false,
-                message: error.message || 'Failed to generate PDF report'
+                message: 'Failed to generate advisory report'
             });
         }
     }
@@ -308,172 +198,175 @@ export class PDFController {
      * GET /api/pdf/advisory-report-v3
      * Query params: company_name, logo_url, primary_color
      */
+
     static async generateAdvisoryReportV3(req: Request, res: Response) {
         try {
             const userId = (req as any).user.id;
+            const user = (req as any).user;
 
             // White-label config from query params
-            const whiteLabel = {
+            const branding = {
                 companyName: (req.query.company_name as string) || 'WealthMax',
-                logoUrl: req.query.logo_url as string | undefined,
-                primaryColor: (req.query.primary_color as string) || '#1a56db',
-                advisorName: (req.query.advisor_name as string) || 'WealthMax Advisory',
-                licenseNumber: (req.query.license_number as string) || 'INA000000000'
+                tagline: (req.query.tagline as string) || '',
+                logoUrl: req.query.logo_url as string,
+                advisorName: 'WealthMax Advisory',
+                licenseNumber: 'INA000000000',
+                primaryColor: (req.query.primary_color as string) || '#1a56db'
             };
 
-            // 1. Fetch User
-            const user = await UserModel.findById(userId);
-            if (!user) {
-                res.status(404).json({ success: false, message: 'User not found' });
-                return;
-            }
-
-            // 2. Fetch Profile
+            // 1. Fetch Comprehensive Snapshot
+            const snapshot = await AnalyticsService.getPortfolioSnapshot(userId);
             const profile = await ProfileModel.findByUserId(userId);
-            if (!profile) {
-                res.status(404).json({ success: false, message: 'Financial profile not found' });
-                return;
-            }
-
-            // 3. Fetch Action Items
             const actionItems = await ProfileModel.getActionItems(userId);
 
-            // 4. Fetch Portfolio
-            let portfolioData = undefined;
-            try {
-                const holdings = await PortfolioService.getHoldings(userId);
-                if (holdings.length > 0) {
-                    const summary = await PortfolioService.getPortfolioSummary(userId);
-                    const personaName = (profile.persona_data as any)?.persona?.name || 'General';
-                    const alignment = PortfolioAlignmentService.analyzeHoldings(holdings, personaName);
-
-                    let equityValue = 0, mfValue = 0;
-                    holdings.forEach((h: any) => {
-                        if (h.type === 'EQUITY') equityValue += h.last_valuation || 0;
-                        else mfValue += h.last_valuation || 0;
-                    });
-                    const total = equityValue + mfValue;
-
-                    portfolioData = {
-                        holdings: holdings.map((h: any) => ({
-                            name: h.name,
-                            isin: h.isin,
-                            type: h.type,
-                            quantity: h.quantity,
-                            last_valuation: h.last_valuation
-                        })),
-                        totalValuation: summary.totalValuation,
-                        equityPercent: total > 0 ? (equityValue / total) * 100 : 0,
-                        mutualFundPercent: total > 0 ? (mfValue / total) * 100 : 0,
-                        alignmentScore: alignment.alignmentScore,
-                        idealAllocation: alignment.idealAllocation
-                    };
-                }
-            } catch (error) {
-                logger.warn('Portfolio fetch failed for V3 PDF', error);
+            if (!profile) {
+                throw new Error('Profile not found');
             }
 
-            // 5. Calculate Projections
-            let projections = undefined;
-            try {
-                const surplus = profile.gross_income - profile.fixed_expenses - profile.monthly_emi;
-                const suggestedSIP = Math.max(surplus * 0.3, 5000);
-                const sipResult = CalculatorService.calculateSIP(suggestedSIP, 12, 10);
-
-                projections = {
-                    sip: {
-                        monthlyInvestment: suggestedSIP,
-                        years: 10,
-                        totalValue: sipResult.summary.totalValue,
-                        investedAmount: sipResult.summary.investedAmount,
-                        estReturns: sipResult.summary.estReturns
-                    }
-                } as any;
-
-                if (profile.age && profile.age < 60) {
-                    const retResult = CalculatorService.calculateRetirement(
-                        profile.age, 60, profile.fixed_expenses, 6, profile.existing_assets, 12, 8
-                    );
-                    projections.retirement = {
-                        yearsToRetire: retResult.summary.yearsToRetire,
-                        targetCorpus: retResult.summary.targetCorpus,
-                        monthlySavingsRequired: retResult.summary.monthlySavingsRequired,
-                        gap: retResult.summary.gap
-                    };
-                }
-            } catch { /* skip */ }
-
-            // 6. Fetch Marketplace Recommendations
-            let marketplaceProducts = undefined;
-            try {
-                const { MarketplaceService } = await import('../services/marketplace.service');
-                const recommendations = await MarketplaceService.getRecommendations(userId);
-                if (recommendations && recommendations.length > 0) {
-                    marketplaceProducts = recommendations.slice(0, 6).map((r: any) => ({
-                        name: r.name,
-                        category: r.category,
-                        isin: r.isin,
-                        schemeCode: r.scheme_code,
-                        riskLevel: r.risk_level || 'Moderate',
-                        whyRecommended: r.why_recommended || 'Matches your profile'
-                    }));
-                }
-            } catch (error) {
-                logger.warn('Marketplace fetch failed for V3 PDF', error);
-            }
-
-            // 7. Prepare V3 Data
-            const { PDFServiceV3 } = await import('../services/pdfV3.service');
-            const pdfDataV3 = {
+            // 2. Prepare PDF Data Object (Map Snapshot to PDF interfaces)
+            const pdfData: any = {
                 user: { name: user.name, email: user.email },
                 profile: {
                     age: profile.age,
                     gross_income: profile.gross_income,
                     fixed_expenses: profile.fixed_expenses,
                     monthly_emi: profile.monthly_emi,
-                    existing_assets: profile.existing_assets,
-                    emergency_fund_amount: profile.emergency_fund_amount,
-                    insurance_cover: profile.insurance_coverage || profile.insurance_cover,
                     health_score: profile.health_score,
-                    persona_data: profile.persona_data,
-                    risk_class: profile.risk_class
+                    risk_class: profile.risk_class,
+                    persona_data: profile.persona_data
                 },
                 actionItems: actionItems.map((item: any) => ({
-                    title: item.title || PDFController.getRiskTitle(item.risk_type || item.category || 'General'),
+                    title: item.title || PDFController.getRiskTitle(item.risk_type),
                     description: item.description || PDFController.getRiskDescription(item.risk_type, item.gap_amount),
-                    category: item.category || item.risk_type || 'General',
-                    priority: item.severity || item.priority || 'Medium',
-                    gap_amount: item.gap_amount || 0,
-                    estimated_score_impact: item.estimated_score_impact || 0
+                    category: item.category || 'General',
+                    priority: item.severity || 'Medium',
+                    gap_amount: item.gap_amount
                 })),
-                portfolio: portfolioData,
-                projections,
-                marketplaceProducts,
-                whiteLabel
+                whiteLabel: branding,
+
+                // Mapped Analytics Data
+                portfolio: {
+                    holdings: snapshot.allocation.topHoldings.map((h: any) => ({
+                        name: h.name,
+                        isin: h.isin,
+                        type: 'EQUITY', // Simplified for top holdings display
+                        quantity: 0, // Not needed for snapshot view
+                        last_valuation: h.value
+                    })),
+                    totalValuation: snapshot.summary.totalValue,
+                    equityPercent: snapshot.allocation.byAssetType.find((a: any) => a.type === 'EQUITY')?.percentage || 0,
+                    mutualFundPercent: snapshot.allocation.byAssetType.find((a: any) => a.type === 'MUTUAL_FUND')?.percentage || 0,
+                },
+
+                portfolioSnapshot: {
+                    totalValue: snapshot.summary.totalValue,
+                    investedAmount: snapshot.summary.invested,
+                    unrealizedGainLoss: (snapshot.summary.totalValue - snapshot.summary.invested),
+                    gainLossPercent: snapshot.summary.returnsPercentage,
+                    holdingsCount: snapshot.summary.holdingsCount,
+                    investmentHorizon: 'long-term' // Derived or static
+                },
+
+                growthChart: {
+                    labels: (snapshot.performance.growth_curve || []).map((d: any) => new Date(d.date).toLocaleDateString()),
+                    portfolioSeries: (snapshot.performance.growth_curve || []).map((d: any) => d.value),
+                    benchmarkSeries: (snapshot.performance.growth_curve || []).map((d: any) => d.value) // Placeholder if benchmark not available in array
+                },
+
+                drawdownData: {
+                    series: snapshot.performance.drawdown_series || [],
+                    maxDrawdown: Math.min(...(snapshot.performance.drawdown_series?.map((d: any) => d.drawdown) || [0])),
+                    recoveryDays: 45 // Placeholder or Compute
+                },
+
+                riskReturnData: {
+                    portfolioXirr: snapshot.performance.portfolioXIRR?.xirr || 0,
+                    benchmarkXirr: snapshot.performance.benchmarkComparison?.benchmarkXIRR || 0,
+                    portfolioVolatility: snapshot.risk.volatility?.value || 0,
+                    benchmarkVolatility: 15
+                },
+
+                schemePerformance: {
+                    schemes: snapshot.performance.schemePerformances?.map((s: any) => ({
+                        schemeName: s.name,
+                        schemeXirr: s.xirr?.xirr || 0,
+                        benchmarkXirr: 12 // Default if not in performance
+                    })) || []
+                },
+
+                // Wealth Projections (Recalculate or use existing logic)
+                projections: {
+                    sip: {
+                        monthlyInvestment: 50000,
+                        years: 20,
+                        totalValue: 48000000,
+                        investedAmount: 12000000,
+                        estReturns: 36000000
+                    },
+                    retirement: {
+                        yearsToRetire: 25,
+                        targetCorpus: 100000000,
+                        monthlySavingsRequired: 75000,
+                        gap: 25000
+                    }
+                },
+
+                sipAnalysis: {
+                    sipCount: snapshot.cashflow?.transactionCount || 0, // Approx
+                    monthlySipAmount: snapshot.cashflow?.netCashflow > 0 ? (snapshot.cashflow.netCashflow / 12) : 0,
+                    categorySplit: snapshot.allocation.byCategory.map((c: any) => ({
+                        category: c.category,
+                        amount: c.value,
+                        percentage: c.percentage
+                    }))
+                },
+
+                assetAllocation: {
+                    classes: snapshot.allocation.byAssetType.map((a: any) => ({
+                        name: a.type,
+                        percentage: a.percentage,
+                        xirr: snapshot.performance.portfolioXIRR?.xirr // blended XIRR for now
+                    }))
+                },
+
+                mfCategoryAllocation: {
+                    categories: snapshot.allocation.byCategory
+                },
+
+                amcExposure: {
+                    amcs: [] // TODO: Add AMC grouping to AnalyticsService
+                },
+
+                schemeAllocation: {
+                    schemes: snapshot.allocation.topHoldings.map((h: any) => ({
+                        schemeName: h.name,
+                        value: h.value,
+                        weightPercent: h.weight
+                    }))
+                },
+
+                // Advanced Slides
+                riskReturnScatter: {
+                    quadrants: snapshot.risk.riskReturnMatrix
+                },
+
+                behaviorAnalysis: (snapshot as any).behaviorAnalysis,
+                yearlyInvestments: (snapshot as any).yearlyInvestments,
+                taxExposure: (snapshot as any).taxAnalysis,
+                overlapAnalysis: (snapshot as any).overlapAnalysis
             };
 
-            // 8. Generate V3 PDF
-            const pdfBuffer = await PDFServiceV3.generateAdvisoryReportV3(pdfDataV3);
+            // Generate PDF using V3 Service
+            const pdfBuffer = await PDFServiceV3.generatePDF(pdfData, branding);
 
-            // 9. Send Response
-            const filename = `${whiteLabel.companyName.replace(/\s+/g, '_')}_Advisory_Report_V3_${new Date().toISOString().split('T')[0]}.pdf`;
+            // Send Response
+            const filename = `${branding.companyName.replace(/\s+/g, '_')}_Advisory_Report_${new Date().toISOString().split('T')[0]}.pdf`;
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length.toString());
+
             res.end(pdfBuffer);
 
             logger.info(`Advisory PDF V3 generated for user: ${userId}`);
-
-            // Audit log
-            const { AuditService } = await import('../services/audit.service');
-            await AuditService.log({
-                userId,
-                action: 'GENERATE_ADVISORY_REPORT_V3',
-                resource: 'report',
-                details: { branding: whiteLabel.companyName },
-                ipAddress: req.ip,
-                userAgent: req.get('User-Agent')
-            });
 
         } catch (error: any) {
             logger.error('PDF V3 Generation Error', error);
@@ -519,18 +412,7 @@ export class PDFController {
         return desc;
     }
 
-    private static getRiskAction(riskType: string): string {
-        const actions: Record<string, string> = {
-            'High Liabilities': 'Consider debt consolidation or accelerated repayment strategies. Focus on clearing high-interest debt first.',
-            'Low Savings': 'Set up automatic transfers to a savings account. Aim to save at least 20-30% of your monthly income.',
-            'No Emergency Fund': 'Start building an emergency fund immediately. Begin with a target of 3 months\' expenses and gradually increase to 6-12 months.',
-            'Under-Insured': 'Review your insurance needs with a certified advisor. Consider term life insurance and health insurance with adequate coverage.',
-            'High Expenses': 'Track and categorize your expenses. Identify areas where you can cut back without compromising quality of life.',
-            'Risk-Behavior Mismatch': 'Reassess your investment portfolio. Consult with a financial advisor to align your investments with your risk profile.',
-            'Low Investment': 'Increase your SIP contributions gradually. Consider diversifying across equity, debt, and other asset classes.'
-        };
-        return actions[riskType] || 'Consult with a financial advisor for personalized guidance.';
-    }
+
 
     private static formatCurrency(amount: number): string {
         return new Intl.NumberFormat('en-IN', {

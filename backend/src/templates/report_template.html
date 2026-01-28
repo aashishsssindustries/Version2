@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>WealthMax Wealth Report</title>
+    <!-- Chart.js via CDN (Playwright can load external resources if properly configured) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* IIFL Style Inspired Layout */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background: #fff;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            position: relative;
+            page-break-after: always;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #b89c56;
+            /* Gold/Bronze accent */
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a237e;
+            /* Deep Blue */
+        }
+
+        .report-meta {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #1a237e;
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            margin-top: 5px;
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            /* Specific height for Chart.js */
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .chart-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .chart-half {
+            width: 50%;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th {
+            background: #1a237e;
+            color: #fff;
+            padding: 8px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background: #fcfcfc;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 20px;
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 16px;
+            color: #b89c56;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            font-size: 10px;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page 1: Executive Summary & Allocation -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">WealthMax Advisory</div>
+            <div class="report-meta">
+                Prepared for: {{userName}}<br>
+                Date: {{reportDate}}<br>
+                Report ID: {{reportId}}
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Net Worth</div>
+                <div class="metric-value">{{totalValuation}}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">XIRR (Returns)</div>
+                <div class="metric-value">{{xirr}}%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Risk Score</div>
+                <div class="metric-value">{{riskScore}}/100</div>
+            </div>
+        </div>
+
+        <h2>Asset Allocation</h2>
+        <div class="chart-container" style="height: 350px;">
+            <canvas id="allocationChart"></canvas>
+        </div>
+
+        <h2>Performance vs Benchmark</h2>
+        <div class="chart-container" style="height: 300px;">
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div class="footer">
+            <span>Generated by WealthMax</span>
+            <span>Confidential & Private</span>
+        </div>
+    </div>
+
+    <!-- Page 2: Holdings & Analysis -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">WealthMax Advisory</div>
+            <div class="report-meta">Page 2</div>
+        </div>
+
+        <h2>Top Holdings by Value</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Asset Name</th>
+                    <th>Type</th>
+                    <th style="text-align:right">Quantity</th>
+                    <th style="text-align:right">Valuation (₹)</th>
+                    <th style="text-align:right">% of Portfolio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#holdings}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td><span
+                            style="font-size:9px; padding:2px 4px; border-radius:3px; background:{{typeColor}}; color:white">{{type}}</span>
+                    </td>
+                    <td style="text-align:right">{{quantity}}</td>
+                    <td style="text-align:right">{{value}}</td>
+                    <td style="text-align:right">{{percent}}%</td>
+                </tr>
+                {{/holdings}}
+            </tbody>
+        </table>
+
+        <h2>Investment Strategy Recommendation</h2>
+        <div
+            style="background:#fcfbf8; padding:20px; border:1px solid #eee; margin-top:20px; font-size:12px; line-height:1.6;">
+            <strong>Advisor Note:</strong><br>
+            {{recommendationText}}
+        </div>
+
+        <div class="footer">
+            <span>Generated by WealthMax</span>
+            <span>Confidential & Private</span>
+        </div>
+    </div>
+
+    <script>
+        // Data Injection
+        const allocationData = {{ allocationDataJson }}; // { labels: [], data: [], colors: [] }
+        const performanceData = {{ performanceDataJson }}; // { labels: [], portfolio: [], benchmark: [] }
+
+        // Render Allocation Chart
+        const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
+        new Chart(ctxAlloc, {
+            type: 'doughnut',
+            data: {
+                labels: allocationData.labels,
+                datasets: [{
+                    data: allocationData.data,
+                    backgroundColor: allocationData.colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { display: false }
+                }
+            }
+        });
+
+        // Render Performance Chart
+        const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctxPerf, {
+            type: 'bar',
+            data: {
+                labels: performanceData.labels,
+                datasets: [
+                    {
+                        label: 'Your Portfolio',
+                        data: performanceData.portfolio,
+                        backgroundColor: '#1a237e'
+                    },
+                    {
+                        label: 'NIFTY 50',
+                        data: performanceData.benchmark,
+                        backgroundColor: '#b89c56'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Signal completion for Playwright
+        // We'll use a hidden div or just wait for network idle, but explicit signal is safer
+        const done = document.createElement('div');
+        done.id = 'render-complete';
+        document.body.appendChild(done);
+    </script>
+</body>
+
+</html>
