@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, TrendingUp, MoreHorizontal, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, FileText, MoreHorizontal, ChevronDown, PieChart, ShoppingBag, AlertTriangle } from 'lucide-react';
 import './TopNavigationBar.css';
 
 interface NavItem {
@@ -17,9 +17,10 @@ const TopNavigationBar: React.FC = () => {
     const primaryNavItems: NavItem[] = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/portfolio', label: 'Portfolio', icon: FileText },
-        { path: '/marketplace', label: 'Markets', icon: TrendingUp },
+        { path: '/portfolio-insights', label: 'Insights', icon: PieChart },
+        { path: '/risk-assessment', label: 'Risk Profile', icon: AlertTriangle },
+        { path: '/marketplace', label: 'Markets', icon: ShoppingBag },
         { path: '/calculators', label: 'Calculators', icon: LayoutDashboard },
-        { path: '/risk-assessment', label: 'Risk Assessment', icon: FileText },
         { path: '/settings', label: 'Settings', icon: MoreHorizontal },
     ];
 

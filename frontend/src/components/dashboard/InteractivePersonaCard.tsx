@@ -247,8 +247,8 @@ export const InteractivePersonaCard: React.FC<InteractivePersonaCardProps> = ({ 
             </div>
 
             {/* Deviation Insight */}
-            <div className="deviation-insight-bar">
-                <span className="insight-label">Largest deviation:</span>
+            <div className={`deviation-insight-bar ${largestDeviations.includes('None') ? 'positive' : 'negative'}`}>
+                <span className="insight-label">Primary Deviation:</span>
                 <span className="insight-value">{largestDeviations}</span>
             </div>
 
