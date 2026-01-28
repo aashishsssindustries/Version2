@@ -10,6 +10,8 @@ import userRoutes from './user.routes';
 import portfolioRoutes from './portfolio.routes';
 import mutualFundRoutes from './mutualFund.routes';
 import projectionRoutes from './projection.routes';
+import goalRoutes from './goal.routes';
+import analyticsRoutes from './analytics.routes';
 
 const router = Router();
 
@@ -25,7 +27,10 @@ router.use('/marketplace', marketplaceRoutes);
 router.use('/portfolio', portfolioRoutes);
 router.use('/mutual-funds', mutualFundRoutes);
 router.use('/projections', projectionRoutes);
+router.use('/goals', goalRoutes);
+router.use('/analytics', analyticsRoutes);
 
 export default router;
+
 
 

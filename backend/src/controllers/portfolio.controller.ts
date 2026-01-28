@@ -150,6 +150,7 @@ export class PortfolioController {
     static async getAlignment(req: Request, res: Response) {
         try {
             const userId = (req as any).user.id;
+            console.log('Alignment Request for user:', userId);
 
             // Fetch user's persona and risk class
             const profile = await ProfileModel.findByUserId(userId);
@@ -157,7 +158,8 @@ export class PortfolioController {
 
             const personaData = profile?.persona_data as any;
             const persona = personaData?.persona?.name || 'General';
-            const riskClass = surveyData?.[0]?.final_class || undefined;
+            // Fallback to profile risk_class if survey not found (e.g. for seeded users)
+            const riskClass = surveyData?.[0]?.final_class || profile?.risk_class || undefined;
 
             // Run alignment analysis
             const alignment = await PortfolioAlignmentService.analyzeAlignment(userId, persona, riskClass);
@@ -174,9 +176,8 @@ export class PortfolioController {
             });
         }
     }
-
     /**
-     * Upload holdings from CAS PDF
+     * Upload holdings and transactions from CAS PDF
      * POST /api/portfolio/upload-cas
      */
     static async uploadCAS(req: Request, res: Response) {
@@ -194,13 +195,14 @@ export class PortfolioController {
                 return;
             }
 
-            // Import CAS parser dynamically to avoid circular dependencies
+            // Import services dynamically to avoid circular dependencies
             const { parseCASPdf } = await import('../services/casParser.service');
+            const { TransactionService } = await import('../services/transaction.service');
 
             // Parse CAS PDF
             const parseResult = await parseCASPdf(file.buffer, password);
 
-            if (!parseResult.success && parseResult.holdings.length === 0) {
+            if (!parseResult.success && parseResult.holdings.length === 0 && parseResult.transactions.length === 0) {
                 res.status(400).json({
                     success: false,
                     message: parseResult.errors[0] || 'Failed to parse CAS PDF',
@@ -210,18 +212,36 @@ export class PortfolioController {
             }
 
             // Import holdings into portfolio
-            const importResult = await PortfolioService.uploadCASHoldings(userId, parseResult.holdings);
+            const holdingResult = await PortfolioService.uploadCASHoldings(userId, parseResult.holdings);
+
+            // Import transactions
+            const transactionResult = await TransactionService.importCASTransactions(userId, parseResult.transactions);
+
+            const allErrors = [
+                ...parseResult.errors,
+                ...holdingResult.errors,
+                ...transactionResult.errors
+            ];
+
+            const totalImported = holdingResult.imported + transactionResult.imported;
 
             res.status(200).json({
-                success: importResult.imported > 0,
-                message: importResult.imported > 0
-                    ? `Imported ${importResult.imported} holdings from CAS`
-                    : 'No new holdings imported',
+                success: totalImported > 0,
+                message: totalImported > 0
+                    ? `Imported ${holdingResult.imported} holdings and ${transactionResult.imported} transactions from CAS`
+                    : 'No new data imported',
                 data: {
-                    totalFound: parseResult.totalFound,
-                    imported: importResult.imported,
-                    skipped: importResult.skipped,
-                    errors: [...parseResult.errors, ...importResult.errors]
+                    holdings: {
+                        totalFound: parseResult.totalHoldingsFound,
+                        imported: holdingResult.imported,
+                        skipped: holdingResult.skipped
+                    },
+                    transactions: {
+                        totalFound: parseResult.totalTransactionsFound,
+                        imported: transactionResult.imported,
+                        skipped: transactionResult.skipped
+                    },
+                    errors: allErrors
                 }
             });
         } catch (error: any) {
@@ -229,6 +249,82 @@ export class PortfolioController {
             res.status(500).json({
                 success: false,
                 message: 'Failed to process CAS PDF upload'
+            });
+        }
+    }
+
+    /**
+     * Get Portfolio Analytics Snapshot
+     * GET /api/portfolio/analytics-snapshot
+     */
+    static async getAnalyticsSnapshot(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user.id;
+            const { AnalyticsSnapshotService } = await import('../services/analyticsSnapshot.service');
+            const snapshot = await AnalyticsSnapshotService.getSnapshot(userId);
+
+            res.status(200).json({
+                success: true,
+                data: snapshot
+            });
+        } catch (error: any) {
+            logger.error('Get Analytics Snapshot Error', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to retrieve analytics snapshot'
+            });
+        }
+    }
+
+    /**
+     * Generate and download Advisory PDF Report
+     * GET /api/portfolio/report/pdf
+     */
+    static async downloadReport(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user.id;
+
+            // 1. Fetch Centralized Snapshot
+            const { AnalyticsSnapshotService } = await import('../services/analyticsSnapshot.service');
+            const snapshot = await AnalyticsSnapshotService.getSnapshot(userId);
+
+            // 2. Prepare Data for Report Service (Adapter Layer)
+            // Adapt the snapshot structure to what the template expects
+
+            const reportData = {
+                userName: snapshot.meta.userName,
+                reportDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+                reportId: `WM-${Date.now().toString().slice(-6)}`,
+                totalValuation: new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(snapshot.summary.netWorth),
+                xirr: snapshot.summary.xirr,
+                riskScore: snapshot.risk.score,
+                allocationDataJson: JSON.stringify(snapshot.charts.assetAllocation),
+                performanceDataJson: JSON.stringify(snapshot.charts.performance),
+                holdings: snapshot.topHoldings.map(h => ({
+                    name: h.name,
+                    type: h.type === 'MUTUAL_FUND' ? 'MF' : 'EQ',
+                    typeColor: h.type === 'MUTUAL_FUND' ? '#6366f1' : '#10b981',
+                    quantity: '-', // Snapshot might not have quantity in topHoldings if we didn't put it there. Let's add it to service or just omit for summary.
+                    value: h.value.toLocaleString('en-IN'),
+                    percent: h.percent.toFixed(1)
+                })),
+                recommendationText: snapshot.risk.flags?.[0]?.message || "Maintain current allocation. Portfolio is well-aligned with your risk profile."
+            };
+
+            // 3. Generate PDF
+            const { ReportService } = await import('../services/report.service');
+            const pdfBuffer = await ReportService.generateAdvisoryReport(reportData);
+
+            // 4. Send Response
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=wealth_report.pdf');
+            res.send(pdfBuffer);
+
+        } catch (error: any) {
+            logger.error('Download Report Error', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to generate report'
             });
         }
     }

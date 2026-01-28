@@ -1,4 +1,5 @@
 import { ProfileModel, FinancialProfile } from '../models/profile.model';
+import { GoalModel } from '../models/goal.model';
 
 // We need to fetch survey responses to calculate literacy.
 // We'll fetch latest survey inside the service.
@@ -75,8 +76,21 @@ export class HealthService {
         }
 
         // --- E. Goal Preparedness (15%) ---
-        // Goals not currently in DB. Return Neutral.
-        let scoreGoal = 8; // Neutral (approx half of 15)
+        const goals = await GoalModel.findByUserId(userId);
+        let scoreGoal = 0;
+
+        if (goals.length === 0) {
+            scoreGoal = 5; // Neutral start for having no goals yet
+        } else {
+            // Logic:
+            // 5 pts for defining goals
+            // 10 pts for funding status (Avg % covered or contributing)
+            // Simple proxy: If monthly_contribution > 0, it's "Active".
+            const activeGoals = goals.filter(g => Number(g.monthly_contribution) > 0 || Number(g.current_amount) > 0).length;
+            const activityRatio = activeGoals / goals.length;
+
+            scoreGoal = 5 + (activityRatio * 10);
+        }
 
         // --- F. Financial Literacy (15%) ---
         // Derived from Survey Score (0-100)

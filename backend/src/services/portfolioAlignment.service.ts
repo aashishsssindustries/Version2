@@ -55,7 +55,7 @@ export class PortfolioAlignmentService {
         let mutualFundValue = 0;
 
         for (const holding of holdings) {
-            const value = holding.last_valuation || 0;
+            const value = parseFloat(holding.last_valuation?.toString() || '0');
             if (holding.type === 'EQUITY') {
                 equityValue += value;
             } else {

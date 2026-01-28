@@ -23,4 +23,10 @@ router.get('/alignment', authenticateToken, PortfolioController.getAlignment);
 // Delete a specific holding
 router.delete('/holdings/:id', authenticateToken, PortfolioController.deleteHolding);
 
+// Download Advisory PDF Report
+router.get('/report/pdf', authenticateToken, PortfolioController.downloadReport);
+
+// Get Unified Analytics Snapshot
+router.get('/analytics-snapshot', authenticateToken, PortfolioController.getAnalyticsSnapshot);
+
 export default router;

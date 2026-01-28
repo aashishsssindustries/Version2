@@ -36,6 +36,7 @@
         "pdf-parse": "^2.4.5",
         "pdfkit": "^0.17.2",
         "pg": "^8.11.3",
+        "playwright": "^1.58.0",
         "puppeteer": "^24.35.0",
         "winston": "^3.11.0"
     },
@@ -48,6 +49,7 @@
         "@types/node": "^20.19.28",
         "@types/nodemailer": "^7.0.5",
         "@types/pg": "^8.10.9",
+        "@types/uuid": "^11.0.0",
         "@typescript-eslint/eslint-plugin": "^6.16.0",
         "@typescript-eslint/parser": "^6.16.0",
         "eslint": "^8.56.0",
