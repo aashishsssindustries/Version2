@@ -462,8 +462,8 @@ export class PDFServiceV3 {
         .snapshot-label { font-size: 10pt; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .snapshot-value { font-size: 24pt; font-weight: 700; color: #1f2937; }
         .snapshot-subvalue { font-size: 12pt; margin-top: 4px; }
-        .snapshot-positive { color: #16a34a; }
-        .snapshot-negative { color: #dc2626; }
+        .snapshot-positive { color: #10b981; }
+        .snapshot-negative { color: #ef4444; }
         .snapshot-insight { background: linear-gradient(135deg, #fef3c7, #fef9c3); border: 1px solid #fbbf24; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
         .insight-icon { font-size: 24pt; }
         .insight-text { font-size: 11pt; color: #92400e; line-height: 1.6; }
@@ -475,8 +475,8 @@ export class PDFServiceV3 {
         .metric-item { text-align: center; }
         .metric-item .metric-label { display: block; font-size: 10pt; color: #6b7280; margin-bottom: 4px; }
         .metric-item .metric-value { font-size: 18pt; font-weight: 700; }
-        .metric-item .positive { color: #16a34a; }
-        .metric-item .negative { color: #dc2626; }
+        .metric-item .positive { color: #10b981; }
+        .metric-item .negative { color: #ef4444; }
         .insight-text-chart { font-size: 11pt; color: #374151; text-align: center; line-height: 1.6; margin: 0; }
         
         /* Drawdown Analysis */
@@ -485,7 +485,7 @@ export class PDFServiceV3 {
         .drawdown-metric { text-align: center; }
         .drawdown-metric-label { font-size: 10pt; color: #6b7280; margin-bottom: 4px; }
         .drawdown-metric-value { font-size: 20pt; font-weight: 700; color: #1f2937; }
-        .drawdown-metric-value.negative { color: #dc2626; }
+        .drawdown-metric-value.negative { color: #ef4444; }
         .drawdown-insight-text { font-size: 11pt; color: #7f1d1d; text-align: center; margin: 0; }
         
         /* Risk Return Table */
@@ -493,13 +493,13 @@ export class PDFServiceV3 {
         .risk-return-table th, .risk-return-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
         .risk-return-table th { background: #f9fafb; font-weight: 600; font-size: 10pt; color: #6b7280; text-transform: uppercase; }
         .risk-return-table td { font-size: 11pt; }
-        .risk-return-table .outperform { color: #16a34a; font-weight: 600; }
-        .risk-return-table .underperform { color: #dc2626; font-weight: 600; }
+        .risk-return-table .outperform { color: #10b981; font-weight: 600; }
+        .risk-return-table .underperform { color: #ef4444; font-weight: 600; }
         .risk-return-legend { display: flex; gap: 24px; justify-content: center; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-size: 10pt; color: #6b7280; }
         .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .legend-dot.outperform { background: #16a34a; }
-        .legend-dot.underperform { background: #dc2626; }
+        .legend-dot.outperform { background: #10b981; }
+        .legend-dot.underperform { background: #ef4444; }
         
         /* Scheme Classification */
         .scheme-classification { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -516,7 +516,7 @@ export class PDFServiceV3 {
         .milestone-card.highlight { background: linear-gradient(135deg, ${config.primaryColor}15, ${config.primaryColor}05); border-color: ${config.primaryColor}50; }
         .milestone-label { font-size: 10pt; color: #6b7280; margin-bottom: 8px; }
         .milestone-value { font-size: 18pt; font-weight: 700; color: #1f2937; }
-        .milestone-growth { font-size: 11pt; color: #16a34a; margin-top: 4px; font-weight: 600; }
+        .milestone-growth { font-size: 11pt; color: #10b981; margin-top: 4px; font-weight: 600; }
         
         /* SIP Analysis */
         .sip-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
@@ -579,12 +579,12 @@ export class PDFServiceV3 {
         .scheme-table .scheme-name { color: #1f2937; font-weight: 500; }
         .scheme-table .scheme-value { color: #374151; font-weight: 600; }
         .weight-bar-container { display: flex; align-items: center; gap: 8px; }
-        .weight-bar { height: 8px; background: linear-gradient(90deg, #1a56db, #3b82f6); border-radius: 4px; }
+        .weight-bar { height: 8px; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px; }
         .weight-pct { font-size: 10pt; color: #374151; font-weight: 600; min-width: 45px; }
         .scheme-table tfoot td { background: #f9fafb; font-weight: 600; border-top: 2px solid #e5e7eb; }
         .total-label { color: #374151; }
         .total-value { color: #1f2937; font-size: 11pt; }
-        .total-pct { color: #1a56db; }
+        .total-pct { color: #3b82f6; }
         
         /* Performance Analysis */
         .performance-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
@@ -599,8 +599,8 @@ export class PDFServiceV3 {
         .perf-details { flex: 1; display: flex; justify-content: space-between; align-items: center; }
         .perf-name { font-size: 10pt; color: #374151; font-weight: 500; }
         .perf-val { font-size: 10pt; font-weight: 600; }
-        .perf-val.positive { color: #16a34a; }
-        .perf-val.negative { color: #dc2626; }
+        .perf-val.positive { color: #10b981; }
+        .perf-val.negative { color: #ef4444; }
         .perf-val.neutral { color: #6b7280; }
         
         /* Allocation Chart */
@@ -614,8 +614,8 @@ export class PDFServiceV3 {
         .overlap-score-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; flex: 0 0 200px; display: flex; flex-direction: column; justify-content: center; }
         .overlap-label { font-size: 10pt; color: #6b7280; margin-bottom: 8px; }
         .overlap-value { font-size: 32pt; font-weight: 700; margin-bottom: 4px; }
-        .overlap-value.high-risk { color: #dc2626; }
-        .overlap-value.low-risk { color: #16a34a; }
+        .overlap-value.high-risk { color: #ef4444; }
+        .overlap-value.low-risk { color: #10b981; }
         .overlap-status { font-size: 11pt; font-weight: 600; color: #374151; }
         .overlap-desc-box { flex: 1; background: #f9fafb; border-radius: 12px; padding: 20px; }
         .overlap-desc-title { font-size: 11pt; color: #1f2937; margin-bottom: 8px; font-weight: 600; }
@@ -652,8 +652,8 @@ export class PDFServiceV3 {
         .behavior-metric-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; text-align: center; }
         .b-icon { font-size: 24pt; margin-bottom: 12px; }
         .b-val { font-size: 20pt; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
-        .b-val.positive-val { color: #16a34a; }
-        .b-val.negative-val { color: #dc2626; }
+        .b-val.positive-val { color: #10b981; }
+        .b-val.negative-val { color: #ef4444; }
         .b-lbl { font-size: 10pt; font-weight: 600; color: #4b5563; margin-bottom: 8px; }
         .b-insight { font-size: 9pt; color: #6b7280; line-height: 1.4; }
         .behavior-tip { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; color: #92400e; font-size: 10pt; line-height: 1.5; }
@@ -673,12 +673,12 @@ export class PDFServiceV3 {
         .tax-split-container { background: #f9fafb; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; }
         .tax-split-bar { display: flex; height: 32px; border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
         .split-segment { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9pt; font-weight: 600; }
-        .split-segment.equity { background: #1a56db; }
+        .split-segment.equity { background: #3b82f6; }
         .split-segment.debt { background: #f59e0b; }
         .split-legend { display: flex; flex-direction: column; gap: 10px; }
         .legend-item { display: flex; align-items: flex-start; gap: 10px; font-size: 10pt; color: #4b5563; }
         .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-        .equity-dot { background: #1a56db; }
+        .equity-dot { background: #3b82f6; }
         .debt-dot { background: #f59e0b; }
         
         /* Methodology */
@@ -808,7 +808,7 @@ export class PDFServiceV3 {
             
             <div class="snapshot-grid">
                 <div class="snapshot-card snapshot-primary">
-                    <div class="snapshot-label">Total Portfolio Value</div>
+                    <div class="snapshot-label">Net Worth</div>
                     <div class="snapshot-value">₹${this.formatCurrency(totalValue)}</div>
                 </div>
                 <div class="snapshot-card">
@@ -816,12 +816,12 @@ export class PDFServiceV3 {
                     <div class="snapshot-value">₹${this.formatCurrency(investedAmount)}</div>
                 </div>
                 <div class="snapshot-card">
-                    <div class="snapshot-label">Unrealized Gain/Loss</div>
+                    <div class="snapshot-label">Total Returns</div>
                     <div class="snapshot-value ${gainLossClass}">${gainLossSign}₹${this.formatCurrency(Math.abs(unrealizedGainLoss))}</div>
                     <div class="snapshot-subvalue ${gainLossClass}">${gainLossSign}${gainLossPercent.toFixed(2)}%</div>
                 </div>
                 <div class="snapshot-card">
-                    <div class="snapshot-label">Number of Holdings</div>
+                    <div class="snapshot-label">Holdings Count</div>
                     <div class="snapshot-value">${holdingsCount}</div>
                 </div>
                 <div class="snapshot-card">
@@ -843,10 +843,24 @@ export class PDFServiceV3 {
     private static renderGrowthChart(data: PDFDataV3, config: WhiteLabelConfig): string {
         const chartData = data.growthChart;
 
-        // Fallback mock data if no chart data provided
-        const labels = chartData?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const portfolioSeries = chartData?.portfolioSeries || [10, 10.5, 10.3, 11.0, 11.5, 11.8];
-        const benchmarkSeries = chartData?.benchmarkSeries || [10, 10.2, 10.1, 10.4, 10.6, 10.8];
+        // Graceful Degradation: Check for sufficient data
+        const hasData = chartData?.labels && chartData.labels.length > 1;
+
+        if (!hasData) {
+            return `
+            <div class="page">
+                <h2 class="section-header">Portfolio Growth Comparison</h2>
+                <div class="no-data-scan-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background: #f9fafb; border-radius: 8px; border: 1px dashed #d1d5db; margin: 40px 0;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📉</div>
+                    <h3 style="color: #374151; margin-bottom: 8px;">Insufficient History</h3>
+                    <p style="color: #6b7280;">Returns and growth comparison available after 6 months of transaction data.</p>
+                </div>
+            </div>`;
+        }
+
+        const labels = chartData?.labels || [];
+        const portfolioSeries = chartData?.portfolioSeries || [];
+        const benchmarkSeries = chartData?.benchmarkSeries || [];
 
         // Calculate performance for insight
         const portfolioReturn = portfolioSeries.length > 1
@@ -965,16 +979,20 @@ export class PDFServiceV3 {
      */
     private static renderDrawdownAnalysis(data: PDFDataV3, _config: WhiteLabelConfig): string {
         const drawdownData = data.drawdownData;
+        const series = drawdownData?.series || [];
 
-        // Fallback mock data if no drawdown data provided
-        const series = drawdownData?.series || [
-            { date: 'Jan', drawdown: 0 },
-            { date: 'Feb', drawdown: -2.5 },
-            { date: 'Mar', drawdown: -5.8 },
-            { date: 'Apr', drawdown: -3.2 },
-            { date: 'May', drawdown: 0 },
-            { date: 'Jun', drawdown: -1.5 }
-        ];
+        // Graceful Degradation
+        if (!series || series.length === 0) {
+            return `
+            <div class="page">
+                <h2 class="section-header">Drawdown Analysis</h2>
+                <div class="no-data-scan-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background: #f9fafb; border-radius: 8px; border: 1px dashed #d1d5db; margin: 40px 0;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🛡️</div>
+                    <h3 style="color: #374151; margin-bottom: 8px;">Risk Analysis Unavailable</h3>
+                    <p style="color: #6b7280;">Drawdown analysis requires historical performance data to compute peak-to-trough declines.</p>
+                </div>
+            </div>`;
+        }
 
         const labels = series.map(s => s.date);
         const values = series.map(s => s.drawdown);
@@ -1086,11 +1104,25 @@ export class PDFServiceV3 {
     private static renderRiskReturnTable(data: PDFDataV3, _config: WhiteLabelConfig): string {
         const riskData = data.riskReturnData;
 
-        // Fallback mock data
-        const portfolioXirr = riskData?.portfolioXirr ?? 12.5;
-        const benchmarkXirr = riskData?.benchmarkXirr ?? 10.2;
-        const portfolioVolatility = riskData?.portfolioVolatility ?? 14.3;
-        const benchmarkVolatility = riskData?.benchmarkVolatility ?? 12.8;
+        // Graceful Degradation: Check for benchmark data
+        const hasBenchmark = riskData?.benchmarkXirr !== undefined && riskData?.benchmarkXirr !== 0;
+
+        if (!hasBenchmark) {
+            return `
+            <div class="page">
+                <h2 class="section-header">Return vs Risk Summary</h2>
+                <div class="no-data-scan-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background: #f9fafb; border-radius: 8px; border: 1px dashed #d1d5db; margin: 40px 0;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <h3 style="color: #374151; margin-bottom: 8px;">Benchmark Comparison Unavailable</h3>
+                    <p style="color: #6b7280;">Benchmark data is currently unavailable for this portfolio's composition.</p>
+                </div>
+            </div>`;
+        }
+
+        const portfolioXirr = riskData?.portfolioXirr || 0;
+        const benchmarkXirr = riskData?.benchmarkXirr || 0;
+        const portfolioVolatility = riskData?.portfolioVolatility || 0;
+        const benchmarkVolatility = riskData?.benchmarkVolatility || 0;
 
         // Calculate diffs
         const xirrDiff = portfolioXirr - benchmarkXirr;
@@ -1362,15 +1394,14 @@ export class PDFServiceV3 {
     private static renderSIPAnalysis(data: PDFDataV3, config: WhiteLabelConfig): string {
         const sipData = data.sipAnalysis;
 
-        // Fallback mock data
-        const sipCount = sipData?.sipCount ?? 4;
-        const monthlySipAmount = sipData?.monthlySipAmount ?? 25000;
-        const categorySplit = sipData?.categorySplit || [
-            { category: 'Large Cap', amount: 10000, percentage: 40 },
-            { category: 'Mid Cap', amount: 7500, percentage: 30 },
-            { category: 'Small Cap', amount: 5000, percentage: 20 },
-            { category: 'Flexi Cap', amount: 2500, percentage: 10 }
-        ];
+        // Graceful Degradation: Hide entire slide if no SIPs
+        if (!sipData || sipData.sipCount === 0 || sipData.monthlySipAmount === 0) {
+            return ''; // Gracefully skip this slide
+        }
+
+        const sipCount = sipData.sipCount;
+        const monthlySipAmount = sipData.monthlySipAmount;
+        const categorySplit = sipData.categorySplit || [];
 
         const colors = ['#1a56db', '#16a34a', '#dc2626', '#9333ea', '#f59e0b', '#06b6d4'];
         const chartId = `sipChart_${Date.now()}`;
@@ -1462,7 +1493,7 @@ export class PDFServiceV3 {
             { name: 'Cash', percentage: 5, xirr: 4.0 }
         ];
 
-        const colors = ['#1a56db', '#16a34a', '#f59e0b', '#9ca3af', '#9333ea', '#dc2626'];
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
         const donutChartId = `allocDonut_${Date.now()}`;
         const barChartId = `allocBar_${Date.now()}`;
 
@@ -1566,12 +1597,12 @@ export class PDFServiceV3 {
             { category: 'Sectoral', percentage: 5, value: 25000 }
         ];
 
-        const colors = ['#1a56db', '#16a34a', '#dc2626', '#9333ea', '#f59e0b', '#06b6d4', '#ec4899'];
+        const colors = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#14b8a6', '#ec4899'];
         const chartId = `mfCatChart_${Date.now()}`;
 
         return `
         <div class="page">
-            <h2 class="section-header">Mutual Fund Category Allocation</h2>
+            <h2 class="section-header">Category Exposure</h2>
             <p style="color: #6b7280; margin-bottom: 24px;">Distribution of your mutual fund investments across fund categories.</p>
             
             <div class="mf-layout">
