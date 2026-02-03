@@ -294,26 +294,12 @@ export class PDFController {
                     })) || []
                 },
 
-                // Wealth Projections (Recalculate or use existing logic)
-                projections: {
-                    sip: {
-                        monthlyInvestment: 50000,
-                        years: 20,
-                        totalValue: 48000000,
-                        investedAmount: 12000000,
-                        estReturns: 36000000
-                    },
-                    retirement: {
-                        yearsToRetire: 25,
-                        targetCorpus: 100000000,
-                        monthlySavingsRequired: 75000,
-                        gap: 25000
-                    }
-                },
+                // Wealth Projections (Dynamic)
+                projections: (snapshot as any).projections,
 
                 sipAnalysis: {
-                    sipCount: snapshot.cashflow?.transactionCount || 0, // Approx
-                    monthlySipAmount: snapshot.cashflow?.netCashflow > 0 ? (snapshot.cashflow.netCashflow / 12) : 0,
+                    sipCount: snapshot.cashflow?.transactionCount || 0,
+                    monthlySipAmount: (snapshot as any).projections?.sip?.monthlyInvestment || 0,
                     categorySplit: snapshot.allocation.byCategory.map((c: any) => ({
                         category: c.category,
                         amount: c.value,
@@ -325,7 +311,7 @@ export class PDFController {
                     classes: snapshot.allocation.byAssetType.map((a: any) => ({
                         name: a.type,
                         percentage: a.percentage,
-                        xirr: snapshot.performance.portfolioXIRR?.xirr // blended XIRR for now
+                        xirr: snapshot.performance.portfolioXIRR?.xirr
                     }))
                 },
 
@@ -334,7 +320,7 @@ export class PDFController {
                 },
 
                 amcExposure: {
-                    amcs: [] // TODO: Add AMC grouping to AnalyticsService
+                    amcs: (snapshot as any).amcExposure || []
                 },
 
                 schemeAllocation: {

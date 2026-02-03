@@ -3,6 +3,7 @@ import { UserPortfolioModel } from '../models/userPortfolio.model';
 import { PortfolioHoldingModel } from '../models/portfolioHolding.model';
 import { HoldingMetadataModel } from '../models/holdingMetadata.model';
 import { MutualFundService } from './mutualFund.service';
+import { EquityService } from './equity.service';
 import { computePortfolioAnalytics } from './portfolioAnalytics.service';
 import { HoldingInput, PortfolioAnalyticsResult } from '../types/portfolioAnalytics';
 import { HoldingSource } from '../types/holdingSource';
@@ -95,6 +96,23 @@ export class PortfolioService {
                 logger.info(`Created MF metadata with NAV for ISIN: ${isin}`, { nav: navData.nav });
                 return { nav: navData.nav, name: navData.name };
             }
+        } else if (assetType === 'EQUITY') {
+            // For EQUITY, fetch Price from Yahoo Finance
+            const equityData = await EquityService.getQuoteByISIN(isin);
+
+            if (equityData) {
+                // Create metadata with Price data
+                await HoldingMetadataModel.create({
+                    isin,
+                    name: equityData.name || `Equity (${isin})`,
+                    type: assetType,
+                    current_nav: equityData.price,
+                    nav_date: equityData.lastUpdated,
+                    ticker: equityData.symbol
+                });
+                logger.info(`Created Equity metadata with Price for ISIN: ${isin}`, { price: equityData.price });
+                return { nav: equityData.price, name: equityData.name || `Equity (${isin})` };
+            }
         }
 
         // Fallback: create stub metadata without NAV
@@ -139,8 +157,8 @@ export class PortfolioService {
         // Get or create portfolio
         const portfolioId = await this.getOrCreateDefaultPortfolio(userId);
 
-        // Compute valuation for MUTUAL_FUND
-        const valuation = (asset_type === 'MUTUAL_FUND' && nav !== null)
+        // Compute valuation for MUTUAL_FUND or EQUITY
+        const valuation = (nav !== null)
             ? parseFloat((quantity * nav).toFixed(2))
             : undefined;
 
@@ -393,13 +411,6 @@ export class PortfolioService {
                 continue;
             }
 
-            // Check for duplicate
-            if (await this.isDuplicateISIN(userId, isin)) {
-                errors.push(`Skipped duplicate ISIN: ${isin}`);
-                skipped++;
-                continue;
-            }
-
             // Ensure metadata exists
             const existing = await HoldingMetadataModel.findByIsin(isin);
             if (!existing) {
@@ -416,16 +427,29 @@ export class PortfolioService {
             // Compute valuation
             const valuation = value || (nav && units ? parseFloat((units * nav).toFixed(2)) : undefined);
 
-            // Create holding with source = 'CAS'
-            await PortfolioHoldingModel.create({
-                portfolio_id: portfolioId,
-                isin,
-                quantity: units,
-                last_valuation: valuation,
-                source: 'CAS' as HoldingSource
-            });
+            // Check if holding exists
+            const existingHolding = await PortfolioHoldingModel.findByPortfolioAndIsin(portfolioId, isin);
 
-            imported++;
+            if (existingHolding) {
+                // Update existing holding (Snapshot behavior)
+                await PortfolioHoldingModel.update(existingHolding.id, {
+                    quantity: units,
+                    last_valuation: valuation,
+                    source: 'CAS',  // Update source to verify it came from CAS
+                    updated_at: new Date()
+                });
+                imported++;
+            } else {
+                // Create new holding with source = 'CAS'
+                await PortfolioHoldingModel.create({
+                    portfolio_id: portfolioId,
+                    isin,
+                    quantity: units,
+                    last_valuation: valuation,
+                    source: 'CAS' as HoldingSource
+                });
+                imported++;
+            }
         }
 
         // Update sync metadata

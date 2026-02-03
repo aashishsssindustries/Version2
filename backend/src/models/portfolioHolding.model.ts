@@ -103,6 +103,31 @@ export class PortfolioHoldingModel {
         return (result.rowCount ?? 0) > 0;
     }
 
+    static async findByPortfolioAndIsin(portfolioId: string, isin: string): Promise<PortfolioHolding | null> {
+        const result = await db.query(
+            'SELECT * FROM portfolio_holdings WHERE portfolio_id = $1 AND isin = $2',
+            [portfolioId, isin]
+        );
+        return result.rows[0] || null;
+    }
+
+    static async update(id: string, updates: Partial<PortfolioHolding>): Promise<PortfolioHolding | null> {
+        const fields = Object.keys(updates);
+        if (fields.length === 0) return null;
+
+        const setClause = fields.map((key, idx) => `${key} = $${idx + 2}`).join(', ');
+        const values = Object.values(updates);
+
+        const result = await db.query(
+            `UPDATE portfolio_holdings 
+             SET ${setClause}, updated_at = NOW() 
+             WHERE id = $1 
+             RETURNING *`,
+            [id, ...values]
+        );
+        return result.rows[0] || null;
+    }
+
     static async getTotalValuationByUserId(userId: string): Promise<number> {
         const result = await db.query(
             `SELECT COALESCE(SUM(ph.last_valuation), 0) as total
