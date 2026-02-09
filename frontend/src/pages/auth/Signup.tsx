@@ -1,6 +1,14 @@
 import React, { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/api';
+import { PasswordInput } from '../../components/ui/PasswordInput';
+import {
+    validateName,
+    validateEmail,
+    validateMobile,
+    validatePassword,
+    validateConfirmPassword
+} from '../../utils/validation';
 import './Auth.css';
 
 const Signup: React.FC = () => {
@@ -13,21 +21,77 @@ const Signup: React.FC = () => {
         confirmPassword: '',
     });
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(false);
+
+    // Validate a single field
+    const validateField = (field: keyof typeof formData, value: string): string => {
+        switch (field) {
+            case 'name':
+                return validateName(value).error;
+            case 'email':
+                return validateEmail(value).error;
+            case 'mobile':
+                return validateMobile(value).error;
+            case 'password':
+                return validatePassword(value).error;
+            case 'confirmPassword':
+                return validateConfirmPassword(formData.password, value).error;
+            default:
+                return '';
+        }
+    };
+
+    // Validate all fields on submit
+    const validateForm = (): boolean => {
+        const errors: Record<string, string> = {};
+
+        const nameResult = validateName(formData.name);
+        if (!nameResult.isValid) errors.name = nameResult.error;
+
+        const emailResult = validateEmail(formData.email);
+        if (!emailResult.isValid) errors.email = emailResult.error;
+
+        const mobileResult = validateMobile(formData.mobile);
+        if (!mobileResult.isValid) errors.mobile = mobileResult.error;
+
+        const passwordResult = validatePassword(formData.password);
+        if (!passwordResult.isValid) errors.password = passwordResult.error;
+
+        const confirmResult = validateConfirmPassword(formData.password, formData.confirmPassword);
+        if (!confirmResult.isValid) errors.confirmPassword = confirmResult.error;
+
+        setFieldErrors(errors);
+        // Mark all fields as touched on submit
+        setTouched({ name: true, email: true, mobile: true, password: true, confirmPassword: true });
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFormData({ ...formData, [field]: value });
+
+        // If field was touched, validate on change to clear errors
+        if (touched[field]) {
+            const error = validateField(field, value);
+            setFieldErrors(prev => ({ ...prev, [field]: error }));
+        }
+    };
+
+    const handleBlur = (field: keyof typeof formData) => () => {
+        // Mark field as touched
+        setTouched(prev => ({ ...prev, [field]: true }));
+        // Validate on blur
+        const error = validateField(field, formData[field]);
+        setFieldErrors(prev => ({ ...prev, [field]: error }));
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
-        // Validate password match
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        // Validate password length
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+        if (!validateForm()) {
             return;
         }
 
@@ -41,13 +105,10 @@ const Signup: React.FC = () => {
                 formData.mobile
             );
 
-            // Store token and user data
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
 
             window.dispatchEvent(new Event('auth-change'));
-
-            // Navigate to dashboard
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to create account');
@@ -70,7 +131,7 @@ const Signup: React.FC = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="auth-form">
+                <form onSubmit={handleSubmit} className="auth-form" noValidate>
                     <div className="input-group">
                         <label htmlFor="name" className="input-label">
                             Full Name
@@ -78,12 +139,14 @@ const Signup: React.FC = () => {
                         <input
                             id="name"
                             type="text"
-                            className="input"
+                            className={`input ${fieldErrors.name ? 'input-error' : ''}`}
                             placeholder="John Doe"
                             value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            onChange={handleChange('name')}
+                            onBlur={handleBlur('name')}
                             required
                         />
+                        {fieldErrors.name && <span className="field-error">{fieldErrors.name}</span>}
                     </div>
 
                     <div className="input-group">
@@ -93,12 +156,14 @@ const Signup: React.FC = () => {
                         <input
                             id="email"
                             type="email"
-                            className="input"
+                            className={`input ${fieldErrors.email ? 'input-error' : ''}`}
                             placeholder="you@example.com"
                             value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onChange={handleChange('email')}
+                            onBlur={handleBlur('email')}
                             required
                         />
+                        {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
                     </div>
 
                     <div className="input-group">
@@ -108,44 +173,46 @@ const Signup: React.FC = () => {
                         <input
                             id="mobile"
                             type="tel"
-                            className="input"
+                            className={`input ${fieldErrors.mobile ? 'input-error' : ''}`}
                             placeholder="9876543210"
                             value={formData.mobile}
-                            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                            onChange={handleChange('mobile')}
+                            onBlur={handleBlur('mobile')}
                             required
-                            pattern="[0-9]{10}"
-                            title="Please enter a valid 10-digit mobile number"
                         />
+                        {fieldErrors.mobile && <span className="field-error">{fieldErrors.mobile}</span>}
                     </div>
 
                     <div className="input-group">
                         <label htmlFor="password" className="input-label">
                             Password
                         </label>
-                        <input
+                        <PasswordInput
                             id="password"
-                            type="password"
-                            className="input"
                             placeholder="••••••••"
                             value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            onChange={handleChange('password')}
+                            onBlur={handleBlur('password')}
+                            error={!!fieldErrors.password}
                             required
                         />
+                        {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
                     </div>
 
                     <div className="input-group">
                         <label htmlFor="confirmPassword" className="input-label">
                             Confirm Password
                         </label>
-                        <input
+                        <PasswordInput
                             id="confirmPassword"
-                            type="password"
-                            className="input"
                             placeholder="••••••••"
                             value={formData.confirmPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            onChange={handleChange('confirmPassword')}
+                            onBlur={handleBlur('confirmPassword')}
+                            error={!!fieldErrors.confirmPassword}
                             required
                         />
+                        {fieldErrors.confirmPassword && <span className="field-error">{fieldErrors.confirmPassword}</span>}
                     </div>
 
                     <button type="submit" className="btn btn-primary btn-full" disabled={loading}>

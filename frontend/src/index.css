@@ -215,6 +215,13 @@ p {
     color: var(--color-text);
 }
 
+/* Required field asterisk indicator - uses :has() to detect required inputs */
+.input-group:has(input:required, select:required, textarea:required) .input-label::after {
+    content: ' *';
+    color: var(--color-error);
+    font-weight: var(--font-weight-semibold);
+}
+
 .input {
     width: 100%;
     padding: 0.625rem 0.875rem;
@@ -235,6 +242,53 @@ p {
 
 .input::placeholder {
     color: var(--color-text-muted);
+}
+
+/* Field validation error styles */
+.input.input-error {
+    border-color: var(--color-error);
+}
+
+.input.input-error:focus {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.field-error {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-error);
+    margin-top: 0.25rem;
+}
+
+/* Password input with toggle */
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-input-wrapper .input {
+    padding-right: 2.75rem;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+    color: var(--color-text);
 }
 
 /* Link */

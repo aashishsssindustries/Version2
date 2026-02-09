@@ -280,7 +280,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Current Age</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Current Age<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.age}
@@ -302,7 +302,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">PAN Number</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">PAN Number<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="text"
                                             value={financialData.pan_number}
@@ -315,7 +315,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Annual Income (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Annual Income (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.gross_income}
@@ -325,7 +325,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Monthly Expenses (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Monthly Expenses (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.fixed_expenses}
@@ -335,7 +335,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Monthly EMI (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Monthly EMI (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.monthly_emi}
@@ -345,7 +345,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Total Assets (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Total Assets (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.existing_assets}
@@ -355,7 +355,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Total Liabilities (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Total Liabilities (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.total_liabilities}
@@ -368,7 +368,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                     <div className="col-span-1 md:col-span-2 border-t border-slate-100 my-2"></div>
 
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Life Insurance Cover (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Life Insurance Cover (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.insurance_coverage}
@@ -378,7 +378,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Annual Premium (₹)</label>
+                                        <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Annual Premium (₹)<span className="text-red-500 font-semibold"> *</span></label>
                                         <input
                                             type="number"
                                             value={financialData.insurance_premium}

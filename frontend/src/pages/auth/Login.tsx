@@ -1,6 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/api';
+import { PasswordInput } from '../../components/ui/PasswordInput';
 import './Auth.css';
 
 const Login: React.FC = () => {
@@ -69,10 +70,8 @@ const Login: React.FC = () => {
                         <label htmlFor="password" className="input-label">
                             Password
                         </label>
-                        <input
+                        <PasswordInput
                             id="password"
-                            type="password"
-                            className="input"
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
