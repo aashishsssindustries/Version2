@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, AlertCircle, CheckCircle2, Save } from 'lucide-react';
 import { userService } from '../services/api';
+import { validateName, validateMobile, validatePassword, PASSWORD_RULES } from '../utils/validation';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import './Settings.css';
 
 export const Settings: React.FC = () => {
@@ -23,6 +25,9 @@ export const Settings: React.FC = () => {
         confirmPassword: ''
     });
 
+    // Field-level errors for profile form
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
     useEffect(() => {
         fetchUser();
     }, []);
@@ -44,6 +49,20 @@ export const Settings: React.FC = () => {
         e.preventDefault();
         setError('');
         setSuccess('');
+
+        // Validate fields
+        const errors: Record<string, string> = {};
+        const nameResult = validateName(profileData.name);
+        if (!nameResult.isValid) errors.name = nameResult.error;
+
+        const mobileResult = validateMobile(profileData.mobile);
+        if (!mobileResult.isValid) errors.mobile = mobileResult.error;
+
+        setFieldErrors(errors);
+        if (Object.keys(errors).length > 0) {
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -74,8 +93,9 @@ export const Settings: React.FC = () => {
             return;
         }
 
-        if (passwordData.newPassword.length < 6) {
-            setError('Password must be at least 6 characters');
+        const passwordResult = validatePassword(passwordData.newPassword);
+        if (!passwordResult.isValid) {
+            setError(passwordResult.error);
             return;
         }
 
@@ -143,11 +163,16 @@ export const Settings: React.FC = () => {
                             <input
                                 type="text"
                                 id="name"
+                                className={fieldErrors.name ? 'input-error' : ''}
                                 value={profileData.name}
-                                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                onChange={(e) => {
+                                    setProfileData({ ...profileData, name: e.target.value });
+                                    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                                }}
                                 required
                                 placeholder="Enter your name"
                             />
+                            {fieldErrors.name && <span className="field-error">{fieldErrors.name}</span>}
                         </div>
 
                         <div className="form-group">
@@ -167,11 +192,16 @@ export const Settings: React.FC = () => {
                             <input
                                 type="tel"
                                 id="mobile"
+                                className={fieldErrors.mobile ? 'input-error' : ''}
                                 value={profileData.mobile}
-                                onChange={(e) => setProfileData({ ...profileData, mobile: e.target.value })}
+                                onChange={(e) => {
+                                    setProfileData({ ...profileData, mobile: e.target.value });
+                                    if (fieldErrors.mobile) setFieldErrors(prev => ({ ...prev, mobile: '' }));
+                                }}
                                 required
                                 placeholder="Enter mobile number"
                             />
+                            {fieldErrors.mobile && <span className="field-error">{fieldErrors.mobile}</span>}
                         </div>
 
                         <button type="submit" className="btn-primary" disabled={loading}>
@@ -188,8 +218,7 @@ export const Settings: React.FC = () => {
 
                         <div className="form-group">
                             <label htmlFor="currentPassword">Current Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 id="currentPassword"
                                 value={passwordData.currentPassword}
                                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
@@ -200,20 +229,18 @@ export const Settings: React.FC = () => {
 
                         <div className="form-group">
                             <label htmlFor="newPassword">New Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 id="newPassword"
                                 value={passwordData.newPassword}
                                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                                 required
-                                placeholder="At least 6 characters"
+                                placeholder={`At least ${PASSWORD_RULES.minLength} characters`}
                             />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="confirmPassword">Confirm New Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 id="confirmPassword"
                                 value={passwordData.confirmPassword}
                                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}

@@ -134,7 +134,7 @@ const Signup: React.FC = () => {
                 <form onSubmit={handleSubmit} className="auth-form" noValidate>
                     <div className="input-group">
                         <label htmlFor="name" className="input-label">
-                            Full Name
+                            Full Name <span className="required-asterisk">*</span>
                         </label>
                         <input
                             id="name"
@@ -151,7 +151,7 @@ const Signup: React.FC = () => {
 
                     <div className="input-group">
                         <label htmlFor="email" className="input-label">
-                            Email
+                            Email <span className="required-asterisk">*</span>
                         </label>
                         <input
                             id="email"
@@ -168,7 +168,7 @@ const Signup: React.FC = () => {
 
                     <div className="input-group">
                         <label htmlFor="mobile" className="input-label">
-                            Mobile Number
+                            Mobile Number <span className="required-asterisk">*</span>
                         </label>
                         <input
                             id="mobile"
@@ -185,7 +185,7 @@ const Signup: React.FC = () => {
 
                     <div className="input-group">
                         <label htmlFor="password" className="input-label">
-                            Password
+                            Password <span className="required-asterisk">*</span>
                         </label>
                         <PasswordInput
                             id="password"
@@ -201,7 +201,7 @@ const Signup: React.FC = () => {
 
                     <div className="input-group">
                         <label htmlFor="confirmPassword" className="input-label">
-                            Confirm Password
+                            Confirm Password <span className="required-asterisk">*</span>
                         </label>
                         <PasswordInput
                             id="confirmPassword"

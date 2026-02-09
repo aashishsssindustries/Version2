@@ -61,23 +61,50 @@ export const validateMobile = (value: string): ValidationResult => {
  * Centralized rules - change here to update everywhere
  */
 export const PASSWORD_RULES = {
-    minLength: 6,
-    // Add more rules here as needed (e.g., requireUppercase, requireNumber)
+    minLength: 8,
+    requireUppercase: true,
+    requireLowercase: true,
+    requireNumber: true,
+    requireSpecialChar: true,
 };
 
 /**
- * Validates a password field
+ * Validates a password field with comprehensive rules
  */
 export const validatePassword = (value: string): ValidationResult => {
     if (!value) {
         return { isValid: false, error: 'Password is required' };
     }
+
+    const errors: string[] = [];
+
     if (value.length < PASSWORD_RULES.minLength) {
+        errors.push(`at least ${PASSWORD_RULES.minLength} characters`);
+    }
+
+    if (PASSWORD_RULES.requireUppercase && !/[A-Z]/.test(value)) {
+        errors.push('one uppercase letter');
+    }
+
+    if (PASSWORD_RULES.requireLowercase && !/[a-z]/.test(value)) {
+        errors.push('one lowercase letter');
+    }
+
+    if (PASSWORD_RULES.requireNumber && !/[0-9]/.test(value)) {
+        errors.push('one number');
+    }
+
+    if (PASSWORD_RULES.requireSpecialChar && !/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+        errors.push('one special character (!@#$%^&*)');
+    }
+
+    if (errors.length > 0) {
         return {
             isValid: false,
-            error: `Password must be at least ${PASSWORD_RULES.minLength} characters long`
+            error: `Password must contain ${errors.join(', ')}`
         };
     }
+
     return { isValid: true, error: '' };
 };
 

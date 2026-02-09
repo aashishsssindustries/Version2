@@ -94,26 +94,45 @@
 }
 
 .option-btn {
-    padding: 12px 16px;
-    border: 1px solid var(--color-border);
+    padding: 14px 18px;
+    border: 2px solid var(--color-border);
     background: var(--color-bg);
     border-radius: var(--radius-md);
     text-align: left;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     cursor: pointer;
     font-weight: 500;
+    position: relative;
 }
 
 .option-btn:hover {
     border-color: var(--color-primary);
-    background: var(--color-surface-hover);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.option-btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 .option-btn.selected {
-    background: var(--color-primary-light);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.12);
+    border-color: #2563eb;
+    border-width: 2px;
+    color: #1e40af;
     font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.option-btn.selected::before {
+    content: '✓';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 1.1rem;
 }
 
 .survey-actions {

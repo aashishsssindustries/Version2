@@ -222,6 +222,12 @@ p {
     font-weight: var(--font-weight-semibold);
 }
 
+/* Explicit required asterisk class for cross-browser compatibility */
+.required-asterisk {
+    color: var(--color-error);
+    font-weight: var(--font-weight-semibold);
+}
+
 .input {
     width: 100%;
     padding: 0.625rem 0.875rem;
@@ -276,19 +282,26 @@ p {
     right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent;
     border: none;
     padding: 0.25rem;
     cursor: pointer;
-    color: var(--color-text-muted);
+    color: #6b7280;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.2s ease;
+    z-index: 10;
 }
 
 .password-toggle-btn:hover {
-    color: var(--color-text);
+    color: #374151;
+}
+
+.password-toggle-btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 /* Link */
