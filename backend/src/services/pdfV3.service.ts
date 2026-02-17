@@ -305,6 +305,12 @@ export class PDFServiceV3 {
 
             const html = this.generateHTML(data, config, reportId, generatedDate, timestamp);
 
+            logger.info('Launching Puppeteer for PDF generation...');
+
+            // Log cache directory info for Render debugging
+            const cachePath = process.env.PUPPETEER_CACHE_DIR || 'default';
+            logger.info(`Puppeteer cache path: ${cachePath}`);
+
             browser = await puppeteer.launch({
                 headless: true,
                 args: [
@@ -314,6 +320,8 @@ export class PDFServiceV3 {
                     '--disable-gpu'
                 ]
             });
+
+            logger.info('Puppeteer browser launched successfully.');
 
             const page = await browser.newPage();
             await page.setContent(html, { waitUntil: 'networkidle0' });

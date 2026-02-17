@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "nodemon src/server.ts",
         "build": "tsc",
+        "build:render": "npm install && npx puppeteer browsers install chrome && tsc",
         "start": "node dist/server.js",
         "migrate": "node-pg-migrate",
         "migrate:create": "node-pg-migrate create",
