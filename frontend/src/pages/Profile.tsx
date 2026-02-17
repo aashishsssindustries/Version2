@@ -96,8 +96,11 @@ const Profile: React.FC = () => {
         try {
             setDownloadingPDF(true);
             const token = localStorage.getItem('token');
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+            const apiUrl = baseUrl.endsWith('/api/v1') ? baseUrl : `${baseUrl.replace(/\/$/, '')}/api/v1`;
+
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}/pdf/advisory-report`,
+                `${apiUrl}/pdf/advisory-report`,
                 {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/pdf' }

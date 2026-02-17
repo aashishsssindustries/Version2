@@ -40,7 +40,8 @@ export const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             setError(null);
 
             // Build V3 URL with query params
-            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+            const envUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            const baseUrl = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl.replace(/\/$/, '')}/api/v1`;
             const queryParams = new URLSearchParams();
 
             // Allow empty company name to fall back to default "WealthMax"
