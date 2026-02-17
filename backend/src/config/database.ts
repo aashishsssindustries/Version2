@@ -7,9 +7,12 @@ class Database {
     private pool: Pool;
 
     private constructor() {
+        const dbUrl = config.get('DATABASE_URL');
+        const isSupabase = dbUrl && dbUrl.includes('supabase');
+
         this.pool = new Pool({
-            connectionString: config.get('DATABASE_URL'),
-            ssl: config.isProduction()
+            connectionString: dbUrl,
+            ssl: isSupabase
                 ? {
                     rejectUnauthorized: false,
                 }
