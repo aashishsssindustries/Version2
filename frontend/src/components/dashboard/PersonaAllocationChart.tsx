@@ -64,14 +64,7 @@ export const PersonaAllocationChart: React.FC<PersonaAllocationChartProps> = ({
     const outerRadius = size * 0.42;
     const innerRadius = size * 0.25;
 
-    // Calculate SVG arc path
-    const describeArc = (startAngle: number, endAngle: number, radius: number): string => {
-        const start = polarToCartesian(centerX, centerY, radius, endAngle);
-        const end = polarToCartesian(centerX, centerY, radius, startAngle);
-        const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
-        return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
-    };
 
     const polarToCartesian = (cx: number, cy: number, radius: number, angleInDegrees: number) => {
         const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;

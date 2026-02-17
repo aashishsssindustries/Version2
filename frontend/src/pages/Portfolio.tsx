@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Briefcase, Trash2, TrendingUp, AlertCircle, BarChart3, Plus, Download } from 'lucide-react';
+import { Briefcase, Trash2, TrendingUp, AlertCircle, Plus, Download } from 'lucide-react';
 import ManualEntry from '../components/portfolio/ManualEntry';
 import CsvUpload from '../components/portfolio/CsvUpload';
-import AllocationChart from '../components/portfolio/AllocationChart';
-import HoldingsBarChart from '../components/portfolio/HoldingsBarChart';
-import PortfolioTreemap from '../components/portfolio/PortfolioTreemap';
+
 import ImportPortfolioModal from '../components/portfolio/ImportPortfolioModal';
 import { portfolioService } from '../services/api';
 import PortfolioHealthSummary from '../components/portfolio/PortfolioHealthSummary';

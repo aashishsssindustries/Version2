@@ -43,7 +43,7 @@ const EmailVerification: React.FC = () => {
         setMessage(null);
 
         try {
-            const response = await authService.verifyEmailOTP(otp);
+            await authService.verifyEmailOTP(otp);
             setIsVerified(true);
             setMessage({ type: 'success', text: 'Email verified successfully!' });
 

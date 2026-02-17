@@ -19,7 +19,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
     const [mobileOtpSent, setMobileOtpSent] = useState(false);
     const [emailOtp, setEmailOtp] = useState('');
     const [mobileOtp, setMobileOtp] = useState('');
-    const [userEmail, setUserEmail] = useState('');
+
     const [sendingEmailOtp, setSendingEmailOtp] = useState(false);
     const [verifyingEmailOtp, setVerifyingEmailOtp] = useState(false);
 
@@ -41,7 +41,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose, onC
         setSendingEmailOtp(true);
         try {
             const response = await authService.sendEmailOTP();
-            setUserEmail(response.email);
+
             setEmailOtpSent(true);
             alert(`OTP sent successfully to ${response.email}`);
         } catch (error: any) {

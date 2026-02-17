@@ -276,7 +276,7 @@ const Calculators: React.FC = () => {
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
                             <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5} dataKey="value">
-                                {data.map((entry: any, index: number) => (
+                                {data.map((_entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][index % 4]} />
                                 ))}
                             </Pie>
